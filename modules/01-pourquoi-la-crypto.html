@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pourquoi la crypto ? — Blockverse Academy</title>
+  <meta name="description" content="Monnaie, confiance, double dépense : pourquoi les cryptomonnaies ont été inventées.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-module="01" data-base="../">
+<main>
+  <div class="container article-layout">
+    <article class="article">
+
+      <h2 id="monnaie">C'est quoi, une monnaie ?</h2>
+      <p>Avant de parler de crypto, il faut comprendre ce qu'est l'argent. Une monnaie remplit trois fonctions :</p>
+      <div class="key-points">
+        <div class="kp"><b>Moyen d'échange</b><span>On l'accepte en paiement, ce qui évite le troc.</span></div>
+        <div class="kp"><b>Unité de compte</b><span>On exprime les prix avec : « ce café coûte 2 € ».</span></div>
+        <div class="kp"><b>Réserve de valeur</b><span>On peut la garder et elle vaudra (à peu près) quelque chose demain.</span></div>
+      </div>
+      <p>Les euros sur ton compte bancaire ne sont pas des billets rangés dans un coffre : ce sont des <strong>lignes dans une base de données</strong> tenue par ta banque. Quand tu paies par carte, ta banque diminue un chiffre, celle du commerçant en augmente un autre. Tout repose sur la <strong>confiance</strong> envers ces intermédiaires (banques, banques centrales, réseaux de paiement).</p>
+
+      <h2 id="double-depense">Le problème de la double dépense</h2>
+      <p>Un fichier numérique se copie à l'infini. Si l'argent n'est qu'un fichier, qu'est-ce qui m'empêche d'envoyer la même pièce numérique à deux personnes ? C'est le <strong>problème de la double dépense</strong>.</p>
+      <p>La solution classique : un <strong>tiers de confiance</strong> qui tient le registre officiel et refuse la deuxième dépense. Ça marche, mais ce tiers peut :</p>
+      <ul>
+        <li>bloquer ou censurer des paiements ;</li>
+        <li>faire faillite, se faire pirater ou commettre des erreurs ;</li>
+        <li>prélever des frais et imposer des délais (un virement international peut prendre plusieurs jours) ;</li>
+        <li>exclure les personnes « non bancarisées » — plus d'un milliard d'adultes dans le monde.</li>
+      </ul>
+      <div class="callout analogy">
+        <span class="t">Analogie</span>
+        <p>Imagine un cahier de comptes partagé dans une classe. Si un seul élève le garde, tout le monde dépend de son honnêteté. Et si <strong>chaque élève avait une copie identique</strong> du cahier, et qu'on avait une règle pour se mettre d'accord sur chaque nouvelle ligne ? Plus besoin du gardien. C'est l'idée de la blockchain.</p>
+      </div>
+
+      <h2 id="satoshi">2008 : l'idée de Satoshi Nakamoto</h2>
+      <p>Le 31 octobre 2008, en pleine crise financière, une personne (ou un groupe) sous le pseudonyme <strong>Satoshi Nakamoto</strong> publie un document de 9 pages : <em>« Bitcoin: A Peer-to-Peer Electronic Cash System »</em>. L'objectif : permettre d'envoyer de l'argent en ligne directement d'une personne à une autre, <strong>sans passer par une institution financière</strong>.</p>
+      <p>Le 3 janvier 2009, le premier bloc (le « bloc genèse ») est miné. Il contient un titre du journal <em>The Times</em> du jour sur le sauvetage des banques — un message politique clair.</p>
+      <p>Bitcoin combine des idées qui existaient déjà (cryptographie, réseaux pair-à-pair, preuve de travail) pour résoudre la double dépense <strong>sans autorité centrale</strong> :</p>
+      <ol>
+        <li>Toutes les transactions sont inscrites dans un <strong>registre public</strong> copié chez des milliers de participants.</li>
+        <li>Les transactions sont regroupées en <strong>blocs</strong> chaînés cryptographiquement (module 3).</li>
+        <li>Un mécanisme de <strong>consensus</strong> décide qui ajoute le prochain bloc (module 4).</li>
+        <li>Chacun prouve qu'il possède ses fonds grâce à des <strong>signatures numériques</strong> (modules 2 et 5).</li>
+      </ol>
+
+      <h2 id="crypto">Crypto-monnaie, crypto-actif, token : on s'y retrouve</h2>
+      <div class="table-wrap">
+      <table class="data">
+        <tr><th>Terme</th><th>Ce que ça désigne</th><th>Exemples</th></tr>
+        <tr><td>Cryptomonnaie</td><td>Actif natif d'une blockchain, utilisé pour payer et sécuriser le réseau</td><td>BTC, ETH, SOL</td></tr>
+        <tr><td>Token</td><td>Actif créé <em>par-dessus</em> une blockchain existante via un smart contract</td><td>USDC, UNI, LINK</td></tr>
+        <tr><td>Stablecoin</td><td>Token dont la valeur suit une monnaie classique (souvent le dollar)</td><td>USDT, USDC, EURC</td></tr>
+        <tr><td>NFT</td><td>Token unique, non interchangeable (titre de propriété numérique)</td><td>Œuvres, billets, objets de jeu</td></tr>
+        <tr><td>Crypto-actif</td><td>Terme juridique large qui englobe tout ce qui précède (règlement européen MiCA)</td><td>—</td></tr>
+      </table>
+      </div>
+
+      <h2 id="promesses">Promesses… et limites</h2>
+      <div class="demo-row">
+        <div class="panel" style="padding:18px">
+          <h3 style="margin-top:0">✔ Ce que la crypto apporte</h3>
+          <ul>
+            <li>Transferts mondiaux 24h/24, sans permission</li>
+            <li>Registre transparent et vérifiable par tous</li>
+            <li>Règles d'émission écrites dans le code</li>
+            <li>Auto-détention : tu contrôles tes fonds</li>
+            <li>Programmabilité (smart contracts)</li>
+          </ul>
+        </div>
+        <div class="panel" style="padding:18px">
+          <h3 style="margin-top:0;color:var(--magenta)">✖ Ses limites</h3>
+          <ul>
+            <li>Forte volatilité des prix</li>
+            <li>Erreurs irréversibles (mauvaise adresse, clé perdue)</li>
+            <li>Arnaques nombreuses, régulation encore récente</li>
+            <li>Scalabilité limitée des blockchains (module 11)</li>
+            <li>Pseudonymat ≠ anonymat : tout est traçable</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout warn">
+        <span class="t">À retenir</span>
+        <p>La blockchain ne supprime pas la confiance : elle la <strong>déplace</strong>. On ne fait plus confiance à une institution, mais à des mathématiques, à du code open source et à des incitations économiques.</p>
+      </div>
+
+      <div class="panel quiz" data-quiz>
+        <h2>Quiz</h2>
+        <div class="q" data-answer="1">
+          <p>Qu'est-ce que le problème de la « double dépense » ?</p>
+          <div class="opts">
+            <button class="opt">Payer deux fois des frais bancaires</button>
+            <button class="opt">Pouvoir dépenser deux fois la même unité de monnaie numérique</button>
+            <button class="opt">Avoir deux comptes dans deux banques</button>
+          </div>
+          <p class="explain">Un fichier se copie facilement : sans registre partagé, rien n'empêche d'envoyer la même « pièce » à deux personnes.</p>
+        </div>
+        <div class="q" data-answer="2">
+          <p>Qui a publié le livre blanc de Bitcoin en 2008 ?</p>
+          <div class="opts">
+            <button class="opt">Vitalik Buterin</button>
+            <button class="opt">La Réserve fédérale américaine</button>
+            <button class="opt">Satoshi Nakamoto, un pseudonyme</button>
+          </div>
+          <p class="explain">L'identité réelle de Satoshi reste inconnue. Vitalik Buterin a co-fondé Ethereum en 2015.</p>
+        </div>
+        <div class="q" data-answer="0">
+          <p>Quelle est la différence entre une cryptomonnaie et un token ?</p>
+          <div class="opts">
+            <button class="opt">La cryptomonnaie est native à sa blockchain, le token est créé par-dessus via un smart contract</button>
+            <button class="opt">Un token n'a jamais de valeur</button>
+            <button class="opt">Il n'y a aucune différence</button>
+          </div>
+          <p class="explain">ETH est la monnaie native d'Ethereum ; USDC est un token émis par un contrat déployé sur Ethereum (et d'autres chaînes).</p>
+        </div>
+      </div>
+
+    </article>
+  </div>
+</main>
+<script src="../js/sha256.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/demos.js"></script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sécurité, MEV & arnaques — Blockverse Academy</title>
+  <meta name="description" content="MEV et attaques sandwich, phishing, drainers, rug pulls, hacks célèbres : se protéger dans l'univers crypto.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-module="13" data-base="../">
+<main>
+  <div class="container article-layout">
+    <article class="article">
+
+      <h2 id="responsabilite">Tu es ta propre banque… et ton propre service de sécurité</h2>
+      <p>L'auto-détention donne un contrôle total, mais aussi une <strong>responsabilité totale</strong> : pas d'annulation de paiement, pas de service client, pas d'assurance des dépôts. La plupart des pertes ne viennent pas de failles de la blockchain, mais d'<strong>erreurs humaines</strong> et d'<strong>ingénierie sociale</strong>.</p>
+
+      <h2 id="mev">Le MEV : la face cachée de la mempool</h2>
+      <p>Le <strong>MEV</strong> (<em>Maximal Extractable Value</em>) est le profit que peut tirer celui qui décide de <strong>l'ordre des transactions</strong> dans un bloc. Comme la mempool est publique, des bots surveillent les transactions en attente et s'insèrent avant ou après elles.</p>
+      <ul>
+        <li><strong>Arbitrage</strong> : corriger un écart de prix entre deux DEX (plutôt bénéfique : il aligne les prix).</li>
+        <li><strong>Liquidations</strong> : être le premier à liquider une position DeFi pour toucher le bonus.</li>
+        <li><strong>Sandwich</strong> : acheter juste avant ta transaction et revendre juste après (néfaste : c'est toi qui paies).</li>
+      </ul>
+
+      <div class="panel corners demo" id="demo-sandwich">
+        <div class="demo-title">Démo · Anatomie d'une attaque sandwich (pool 1 M USDC / 500 ETH)</div>
+        <div class="demo-row">
+          <div>
+            <label for="sw-victim">Ton achat (USDC)</label>
+            <input class="input" id="sw-victim" type="number" value="50000" min="0" step="1000">
+          </div>
+          <div>
+            <label for="sw-bot">Capital du bot (USDC)</label>
+            <input class="input" id="sw-bot" type="number" value="200000" min="0" step="10000">
+          </div>
+        </div>
+        <div id="sw-out" class="hash-out" style="color:var(--text)"></div>
+        <p class="demo-note">Protection : régler une <strong>tolérance de slippage</strong> faible (la transaction échoue si le prix bouge trop) et utiliser un RPC « privé » ou anti-MEV qui n'expose pas ta transaction dans la mempool publique.</p>
+      </div>
+      <p>Sur Ethereum, l'écosystème MEV s'est organisé avec la <strong>séparation proposeur-constructeur</strong> (PBS) : des « builders » spécialisés construisent les blocs les plus rentables et les proposent aux validateurs via des relais (MEV-Boost).</p>
+
+      <h2 id="arnaques">Les arnaques les plus courantes</h2>
+      <div class="table-wrap">
+      <table class="data">
+        <tr><th>Arnaque</th><th>Comment ça marche</th><th>Signal d'alerte</th></tr>
+        <tr><td><strong>Phishing</strong></td><td>Faux site ou faux mail d'un wallet/exchange qui demande ta seed phrase</td><td>Toute demande de seed phrase, URL légèrement différente</td></tr>
+        <tr><td><strong>Drainer</strong></td><td>Site qui te fait signer une autorisation ou une signature « permit » qui donne accès à tes tokens</td><td>« Claim ton airdrop », signature incompréhensible</td></tr>
+        <tr><td><strong>Rug pull</strong></td><td>Les créateurs d'un token retirent la liquidité ou vendent tout d'un coup</td><td>Équipe anonyme, liquidité non verrouillée, hype sur les réseaux</td></tr>
+        <tr><td><strong>Honeypot</strong></td><td>Token qu'on peut acheter mais pas revendre (code piégé)</td><td>Personne n'arrive à vendre, contrat non vérifié</td></tr>
+        <tr><td><strong>Pig butchering</strong></td><td>Relation de confiance construite pendant des semaines (amitié, romance) puis « opportunité » d'investissement</td><td>Inconnu sympathique qui parle vite d'investissement</td></tr>
+        <tr><td><strong>Faux support</strong></td><td>Comptes qui répondent à ta question publique sur Discord/X en se faisant passer pour l'équipe</td><td>Un « admin » qui t'écrit en privé en premier</td></tr>
+        <tr><td><strong>Address poisoning</strong></td><td>Envoi de micro-transactions depuis une adresse qui ressemble à celle d'un de tes contacts</td><td>Copier une adresse depuis l'historique</td></tr>
+        <tr><td><strong>Ponzi / faux rendement</strong></td><td>Rendement « garanti » payé par l'argent des nouveaux entrants</td><td>Rendement fixe élevé, parrainage obligatoire</td></tr>
+      </table>
+      </div>
+
+      <h2 id="signatures">Lire ce que l'on signe</h2>
+      <p>Signer un message n'est pas anodin. Certaines signatures « hors chaîne » (<code>permit</code>, <code>Permit2</code>, ordres de places de marché NFT) peuvent autoriser un tiers à déplacer tes actifs <strong>sans que tu payes de gas ni que tu voies de transaction</strong>. Avant de signer :</p>
+      <ul>
+        <li>Lis la simulation proposée par ton wallet : quels actifs sortent ? Vers qui ?</li>
+        <li>Méfie-toi de <code>setApprovalForAll</code> (accès à toute une collection NFT) et des approbations illimitées.</li>
+        <li>Refuse toute signature que tu ne comprends pas, surtout sous pression (« offre expire dans 5 minutes »).</li>
+      </ul>
+
+      <h2 id="hacks">Quelques hacks qui ont marqué l'histoire</h2>
+      <div class="table-wrap">
+      <table class="data">
+        <tr><th>Année</th><th>Cible</th><th>Montant approx.</th><th>Cause</th></tr>
+        <tr><td>2014</td><td>Mt. Gox (exchange)</td><td>~850 000 BTC</td><td>Mauvaise gestion, vol progressif des fonds</td></tr>
+        <tr><td>2016</td><td>The DAO</td><td>~3,6 M ETH</td><td>Faille de réentrance</td></tr>
+        <tr><td>2022</td><td>Ronin Bridge</td><td>~620 M$</td><td>Clés de validateurs compromises</td></tr>
+        <tr><td>2022</td><td>FTX (exchange)</td><td>~8 Md$ de fonds clients</td><td>Fraude : fonds clients utilisés par la direction</td></tr>
+        <tr><td>2025</td><td>Bybit (exchange)</td><td>~1,5 Md$</td><td>Interface de signature multisig compromise</td></tr>
+      </table>
+      </div>
+      <p>Leçon : même des acteurs majeurs se font pirater. La plus grosse attaque contre un exchange (Bybit, 2025) n'a pas exploité la blockchain, mais l'<strong>interface</strong> qui affichait aux signataires une transaction différente de celle qu'ils signaient réellement.</p>
+
+      <h2 id="checklist">Checklist de sécurité</h2>
+      <div class="key-points">
+        <div class="kp"><b>① Seed hors ligne</b><span>Sur papier ou métal, jamais numérique, jamais partagée.</span></div>
+        <div class="kp"><b>② Hardware wallet</b><span>Pour toute somme que tu ne veux pas perdre.</span></div>
+        <div class="kp"><b>③ Wallets séparés</b><span>Un « coffre » qui ne signe jamais rien, un wallet « jetable » pour tester les applis.</span></div>
+        <div class="kp"><b>④ Favoris</b><span>Accède aux sites via tes favoris, pas via des liens ou des pubs.</span></div>
+        <div class="kp"><b>⑤ 2FA par appli</b><span>Sur les exchanges : application d'authentification ou clé de sécurité, pas de SMS.</span></div>
+        <div class="kp"><b>⑥ Test d'abord</b><span>Pour un gros envoi, envoie d'abord un petit montant.</span></div>
+        <div class="kp"><b>⑦ Révoque</b><span>Fais régulièrement le ménage dans tes autorisations de tokens.</span></div>
+        <div class="kp"><b>⑧ Discrétion</b><span>Ne dis pas publiquement combien tu possèdes.</span></div>
+      </div>
+
+      <div class="callout warn">
+        <span class="t">Le mot de la fin</span>
+        <p>Tu as parcouru tout le chemin, du simple hash aux rollups ZK. Tu sais maintenant comment la technologie fonctionne — ce qui est la meilleure protection contre les promesses trop belles. Rien sur ce site n'est un conseil en investissement : continue d'apprendre, reste curieux et sceptique. 🚀</p>
+      </div>
+
+      <div class="panel quiz" data-quiz>
+        <h2>Quiz final</h2>
+        <div class="q" data-answer="1">
+          <p>Qu'est-ce qu'une attaque sandwich ?</p>
+          <div class="opts">
+            <button class="opt">Un vol de seed phrase par email</button>
+            <button class="opt">Un bot qui achète juste avant ta transaction et revend juste après</button>
+            <button class="opt">Une attaque des 51 %</button>
+          </div>
+          <p class="explain">Le bot profite de l'impact de prix que ta transaction va créer ; c'est toi qui paies via un moins bon prix.</p>
+        </div>
+        <div class="q" data-answer="0">
+          <p>Un site te propose de « réclamer un airdrop » en signant un message. Que fais-tu ?</p>
+          <div class="opts">
+            <button class="opt">Je vérifie la source officielle et la simulation ; dans le doute, je refuse</button>
+            <button class="opt">Je signe vite, l'offre est limitée</button>
+            <button class="opt">Je signe, une signature ne coûte pas de gas donc c'est sans risque</button>
+          </div>
+          <p class="explain">Une signature sans gas peut autoriser le transfert de tous tes tokens (permit).</p>
+        </div>
+        <div class="q" data-answer="2">
+          <p>Quelle pratique protège le mieux tes fonds sur le long terme ?</p>
+          <div class="opts">
+            <button class="opt">Garder sa seed phrase dans ses notes de téléphone</button>
+            <button class="opt">Tout laisser sur un seul exchange</button>
+            <button class="opt">Un hardware wallet avec une seed phrase conservée hors ligne</button>
+          </div>
+          <p class="explain">Les clés ne touchent jamais un appareil connecté.</p>
+        </div>
+      </div>
+
+    </article>
+  </div>
+</main>
+<script src="../js/sha256.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/demos.js"></script>
+</body>
+</html>

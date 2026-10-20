@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>La blockchain, bloc par bloc — Blockverse Academy</title>
+  <meta name="description" content="Blocs, chaînage par hash, nonce, minage et immuabilité : une blockchain interactive à manipuler.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-module="03" data-base="../">
+<main>
+  <div class="container article-layout">
+    <article class="article">
+
+      <h2 id="definition">Une blockchain, concrètement</h2>
+      <p>Une blockchain est un <strong>registre</strong> (une liste de transactions) qui a trois caractéristiques :</p>
+      <ul>
+        <li><strong>Distribué</strong> : des milliers d'ordinateurs (les <em>nœuds</em>) en possèdent une copie complète.</li>
+        <li><strong>Append-only</strong> : on ne peut qu'ajouter des données à la fin, jamais modifier le passé.</li>
+        <li><strong>Chaîné cryptographiquement</strong> : chaque bloc est lié au précédent par son hash.</li>
+      </ul>
+
+      <h2 id="bloc">Anatomie d'un bloc</h2>
+      <p>Un bloc se compose d'un <strong>en-tête</strong> (header) et d'une liste de <strong>transactions</strong>. Dans Bitcoin, l'en-tête fait seulement 80 octets :</p>
+      <div class="table-wrap">
+      <table class="data">
+        <tr><th>Champ</th><th>Rôle</th></tr>
+        <tr><td>Version</td><td>Règles de validation utilisées</td></tr>
+        <tr><td>Hash du bloc précédent</td><td>Le <strong>maillon</strong> qui relie les blocs entre eux</td></tr>
+        <tr><td>Racine de Merkle</td><td>Résumé de toutes les transactions du bloc</td></tr>
+        <tr><td>Horodatage</td><td>Moment approximatif de création</td></tr>
+        <tr><td>Difficulté (bits)</td><td>Cible que le hash du bloc doit atteindre</td></tr>
+        <tr><td>Nonce</td><td>Nombre que les mineurs font varier pour trouver un hash valide</td></tr>
+      </table>
+      </div>
+
+      <h2 id="chainage">Le chaînage : pourquoi on ne peut pas tricher</h2>
+      <p>Le hash d'un bloc dépend de <strong>tout</strong> son contenu, y compris du hash du bloc précédent. Résultat : si quelqu'un modifie une ancienne transaction,</p>
+      <ol>
+        <li>le hash de ce bloc change ;</li>
+        <li>le bloc suivant, qui contenait l'ancien hash, ne pointe plus vers le bon bloc ;</li>
+        <li>et ainsi de suite jusqu'au bout de la chaîne : <strong>tout s'effondre en cascade</strong>.</li>
+      </ol>
+      <p>Pour faire accepter sa falsification, le tricheur devrait <strong>re-miner tous les blocs suivants</strong> plus vite que le reste du réseau réuni. Essaie toi-même :</p>
+
+      <div class="panel corners demo" id="demo-chain">
+        <div class="demo-title">Démo · Blockchain minable (difficulté : hash commençant par « 000 »)</div>
+        <div class="chain"></div>
+        <p class="demo-note">
+          ① Modifie les données du bloc #2 (ex. « Alice → Bob : 1000 ») : les blocs #2, #3 et #4 deviennent <span style="color:var(--danger)">invalides</span>.<br>
+          ② Clique sur « Miner » du bloc #2 : l'ordinateur essaie des milliers de nonces jusqu'à trouver un hash valide.<br>
+          ③ Les blocs suivants restent invalides : il faut aussi les re-miner. Sur Bitcoin, avec des milliards de milliards d'essais par seconde, c'est hors de portée d'un tricheur isolé.
+        </p>
+      </div>
+
+      <h2 id="minage">Le minage en une phrase</h2>
+      <p>Miner, c'est <strong>chercher par essais successifs</strong> un nonce tel que le hash de l'en-tête soit inférieur à une cible (ce qui revient à « commencer par un certain nombre de zéros »). Il n'y a aucune astuce : seulement de la force brute. Celui qui trouve gagne le droit d'ajouter le bloc et touche une récompense.</p>
+      <div class="callout analogy">
+        <span class="t">Analogie</span>
+        <p>C'est une loterie où chaque ticket coûte de l'électricité. Plus tu achètes de tickets (de puissance de calcul), plus tu as de chances de gagner. Mais vérifier un ticket gagnant ne prend qu'une seconde à n'importe qui.</p>
+      </div>
+      <p>La <strong>difficulté</strong> s'ajuste automatiquement : sur Bitcoin, tous les 2016 blocs (~2 semaines), pour que le réseau produise en moyenne <strong>un bloc toutes les 10 minutes</strong>, quel que soit le nombre de mineurs.</p>
+
+      <h2 id="noeuds">Les nœuds et le réseau pair-à-pair</h2>
+      <p>Les nœuds sont reliés entre eux sans serveur central. Quand tu envoies une transaction :</p>
+      <ol>
+        <li>Ton wallet la transmet à quelques nœuds, qui la vérifient (signature valide ? fonds suffisants ?) et la relaient à leurs voisins.</li>
+        <li>Elle attend dans la <strong>mempool</strong> (salle d'attente des transactions non confirmées).</li>
+        <li>Un mineur/validateur l'inclut dans un bloc.</li>
+        <li>Le bloc est diffusé ; chaque nœud le vérifie indépendamment et l'ajoute à sa copie.</li>
+      </ol>
+      <p>Chaque bloc supplémentaire empilé par-dessus est une <strong>confirmation</strong>. Sur Bitcoin, on considère souvent qu'après 6 confirmations (~1 heure), une transaction est pratiquement irréversible.</p>
+
+      <h2 id="forks">Forks : quand la chaîne se divise</h2>
+      <ul>
+        <li><strong>Fork temporaire</strong> : deux mineurs trouvent un bloc presque en même temps. Le réseau suit la chaîne qui reçoit le plus de travail cumulé ; l'autre bloc devient « orphelin ».</li>
+        <li><strong>Soft fork</strong> : mise à jour qui durcit les règles, compatible avec les anciens nœuds (ex. SegWit en 2017).</li>
+        <li><strong>Hard fork</strong> : changement incompatible. Si une partie de la communauté refuse, deux blockchains coexistent (ex. Bitcoin Cash en 2017, Ethereum Classic en 2016).</li>
+      </ul>
+
+      <div class="callout warn">
+        <span class="t">Idée reçue</span>
+        <p>« La blockchain est infalsifiable » est un raccourci. Elle est <strong>très coûteuse</strong> à falsifier tant qu'aucun acteur ne contrôle la majorité de la puissance (attaque des 51 %, voir module 4). Les petites blockchains peu sécurisées ont déjà subi ce type d'attaque.</p>
+      </div>
+
+      <div class="panel quiz" data-quiz>
+        <h2>Quiz</h2>
+        <div class="q" data-answer="2">
+          <p>Qu'est-ce qui relie un bloc au précédent ?</p>
+          <div class="opts">
+            <button class="opt">Son horodatage</button>
+            <button class="opt">Le nom du mineur</button>
+            <button class="opt">Le hash du bloc précédent inclus dans son en-tête</button>
+          </div>
+          <p class="explain">C'est ce maillon qui provoque l'effet cascade si on modifie l'historique.</p>
+        </div>
+        <div class="q" data-answer="0">
+          <p>Que cherche un mineur ?</p>
+          <div class="opts">
+            <button class="opt">Un nonce qui donne un hash inférieur à la cible de difficulté</button>
+            <button class="opt">La clé privée des autres utilisateurs</button>
+            <button class="opt">Des pièces cachées dans la blockchain</button>
+          </div>
+          <p class="explain">C'est une recherche par force brute ; le résultat est facile à vérifier par tous.</p>
+        </div>
+        <div class="q" data-answer="1">
+          <p>Qu'est-ce que la mempool ?</p>
+          <div class="opts">
+            <button class="opt">Une pool de minage</button>
+            <button class="opt">La file d'attente des transactions pas encore incluses dans un bloc</button>
+            <button class="opt">La mémoire d'un wallet</button>
+          </div>
+          <p class="explain">Chaque nœud a sa propre mempool ; les transactions avec les frais les plus élevés sont généralement choisies en premier.</p>
+        </div>
+      </div>
+
+    </article>
+  </div>
+</main>
+<script src="../js/sha256.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/demos.js"></script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hachage & cryptographie — Blockverse Academy</title>
+  <meta name="description" content="Fonctions de hachage SHA-256, effet avalanche et cryptographie à clé publique expliqués avec une démo.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-module="02" data-base="../">
+<main>
+  <div class="container article-layout">
+    <article class="article">
+
+      <h2 id="hash">Une empreinte digitale pour les données</h2>
+      <p>Une <strong>fonction de hachage</strong> prend n'importe quelle donnée (un mot, un livre, un film) et la transforme en une suite de caractères de taille fixe appelée <strong>hash</strong> ou <strong>empreinte</strong>. Bitcoin utilise <code>SHA-256</code>, qui produit toujours 256 bits, soit 64 caractères hexadécimaux.</p>
+      <div class="callout analogy">
+        <span class="t">Analogie</span>
+        <p>C'est comme une empreinte digitale : elle identifie une personne de façon quasi unique, elle est minuscule comparée à la personne, et on ne peut pas reconstruire la personne à partir de l'empreinte.</p>
+      </div>
+
+      <h2 id="proprietes">Les 5 propriétés indispensables</h2>
+      <div class="key-points">
+        <div class="kp"><b>Déterministe</b><span>La même entrée donne toujours le même hash.</span></div>
+        <div class="kp"><b>Rapide</b><span>Calculer un hash prend une fraction de microseconde.</span></div>
+        <div class="kp"><b>Irréversible</b><span>Impossible de retrouver l'entrée à partir du hash (« sens unique »).</span></div>
+        <div class="kp"><b>Effet avalanche</b><span>Changer un seul caractère change environ la moitié des bits du hash.</span></div>
+        <div class="kp"><b>Résistant aux collisions</b><span>Trouver deux entrées avec le même hash est pratiquement impossible.</span></div>
+      </div>
+
+      <div class="panel corners demo" id="demo-hash">
+        <div class="demo-title">Démo · SHA-256 en direct</div>
+        <div class="demo-row">
+          <div>
+            <label for="hash-a">Entrée 1</label>
+            <textarea class="input" id="hash-a">Bonjour la blockchain</textarea>
+            <div class="hash-out" id="hash-out-a"></div>
+          </div>
+          <div>
+            <label for="hash-b">Entrée 2 (modifie un caractère)</label>
+            <textarea class="input" id="hash-b">Bonjour la blockchain!</textarea>
+            <div class="hash-out" id="hash-out-b"></div>
+          </div>
+        </div>
+        <p class="demo-note" id="hash-stat"></p>
+        <p class="demo-note">Les caractères en <span style="color:var(--magenta)">magenta</span> diffèrent de l'empreinte 1. Ce calcul utilise le vrai algorithme SHA-256, exécuté dans ton navigateur.</p>
+      </div>
+
+      <h2 id="usage">À quoi ça sert dans une blockchain ?</h2>
+      <ul>
+        <li><strong>Identifier</strong> les transactions et les blocs (leur « numéro » est leur hash).</li>
+        <li><strong>Chaîner</strong> les blocs : chaque bloc contient le hash du précédent (module 3).</li>
+        <li><strong>Miner</strong> : la preuve de travail consiste à chercher un hash commençant par plusieurs zéros (module 4).</li>
+        <li><strong>Résumer</strong> des milliers de transactions en un seul hash grâce à l'<strong>arbre de Merkle</strong>.</li>
+        <li><strong>Dériver</strong> des adresses à partir des clés publiques (module 5).</li>
+      </ul>
+
+      <h3>L'arbre de Merkle</h3>
+      <p>On hache chaque transaction, puis on hache les hashes deux par deux, et ainsi de suite jusqu'à obtenir un hash unique : la <strong>racine de Merkle</strong>, stockée dans l'en-tête du bloc. Si une seule transaction change, la racine change. Bonus : on peut prouver qu'une transaction est dans le bloc en ne fournissant que quelques hashes (une « preuve de Merkle »), sans télécharger tout le bloc.</p>
+      <pre class="code"><span class="c">                 Racine = H(H12 + H34)</span>
+                    /               \
+          H12 = H(H1+H2)        H34 = H(H3+H4)
+            /       \             /       \
+         H1=H(Tx1) H2=H(Tx2)  H3=H(Tx3) H4=H(Tx4)</pre>
+
+      <h2 id="asymetrique">La cryptographie à clé publique</h2>
+      <p>Le hachage ne suffit pas : il faut aussi prouver <strong>qui</strong> autorise une transaction. C'est le rôle de la cryptographie <strong>asymétrique</strong>, qui repose sur une paire de clés liées mathématiquement :</p>
+      <div class="demo-row">
+        <div class="callout"><span class="t">Clé privée 🔒</span><p>Un nombre secret immense (256 bits). Elle sert à <strong>signer</strong>. Qui la possède possède les fonds.</p></div>
+        <div class="callout"><span class="t">Clé publique 🔓</span><p>Calculée à partir de la clé privée, partageable. Elle sert à <strong>vérifier</strong> les signatures.</p></div>
+      </div>
+      <p>Passer de la clé privée à la clé publique est facile ; l'inverse est impossible en pratique. Bitcoin et Ethereum utilisent l'algorithme <strong>ECDSA</strong> sur la courbe elliptique <code>secp256k1</code> (Bitcoin utilise aussi les signatures <strong>Schnorr</strong> depuis la mise à jour Taproot de 2021).</p>
+
+      <h3>Signer une transaction</h3>
+      <ol>
+        <li>Alice écrit : « J'envoie 0,1 BTC à Bob ».</li>
+        <li>Elle combine ce message avec sa <strong>clé privée</strong> → elle obtient une <strong>signature</strong>.</li>
+        <li>Elle diffuse le message + la signature au réseau.</li>
+        <li>N'importe qui peut vérifier, avec la <strong>clé publique</strong> d'Alice, que la signature est valide et que le message n'a pas été modifié.</li>
+      </ol>
+      <div class="callout">
+        <span class="t">Point clé</span>
+        <p>La signature prouve qu'Alice connaît sa clé privée <strong>sans jamais la révéler</strong>. Et elle est propre à ce message : impossible de la réutiliser pour une autre transaction.</p>
+      </div>
+
+      <h2 id="quantique">Et les ordinateurs quantiques ?</h2>
+      <p>Un ordinateur quantique suffisamment puissant pourrait, en théorie, retrouver une clé privée à partir d'une clé publique (algorithme de Shor). Ces machines n'existent pas encore à l'échelle nécessaire, mais les communautés Bitcoin et Ethereum étudient déjà des signatures <strong>post-quantiques</strong>. Les fonctions de hachage comme SHA-256 sont, elles, bien plus résistantes.</p>
+
+      <div class="panel quiz" data-quiz>
+        <h2>Quiz</h2>
+        <div class="q" data-answer="1">
+          <p>Que se passe-t-il si on change une seule lettre d'un texte avant de le hacher ?</p>
+          <div class="opts">
+            <button class="opt">Le hash change d'un seul caractère</button>
+            <button class="opt">Le hash change complètement (effet avalanche)</button>
+            <button class="opt">Le hash ne change pas</button>
+          </div>
+          <p class="explain">Environ 50 % des bits changent : impossible de deviner quoi que ce soit de l'entrée à partir du hash.</p>
+        </div>
+        <div class="q" data-answer="0">
+          <p>Avec quelle clé signe-t-on une transaction ?</p>
+          <div class="opts">
+            <button class="opt">La clé privée</button>
+            <button class="opt">La clé publique</button>
+            <button class="opt">Le hash du bloc</button>
+          </div>
+          <p class="explain">On signe avec la clé privée ; tout le monde vérifie avec la clé publique.</p>
+        </div>
+        <div class="q" data-answer="2">
+          <p>À quoi sert la racine de Merkle ?</p>
+          <div class="opts">
+            <button class="opt">À chiffrer les transactions</button>
+            <button class="opt">À stocker les clés privées</button>
+            <button class="opt">À résumer toutes les transactions d'un bloc en un seul hash</button>
+          </div>
+          <p class="explain">La moindre modification d'une transaction change la racine, ce qui invalide le bloc.</p>
+        </div>
+      </div>
+
+    </article>
+  </div>
+</main>
+<script src="../js/sha256.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/demos.js"></script>
+</body>
+</html>

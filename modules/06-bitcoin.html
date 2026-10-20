@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bitcoin en profondeur — Blockverse Academy</title>
+  <meta name="description" content="UTXO, frais, halving, offre limitée à 21 millions, Lightning Network : comment fonctionne Bitcoin.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-module="06" data-base="../">
+<main>
+  <div class="container article-layout">
+    <article class="article">
+
+      <h2 id="role">Le rôle de Bitcoin</h2>
+      <p>Bitcoin est volontairement <strong>simple et conservateur</strong> : son objectif est d'être une monnaie numérique rare, résistante à la censure et sans émetteur central. Ses règles changent très rarement, et seulement avec un large consensus. On le compare souvent à de « l'or numérique ».</p>
+      <div class="key-points">
+        <div class="kp"><b>~10 min</b><span>Temps moyen entre deux blocs</span></div>
+        <div class="kp"><b>21 000 000</b><span>Nombre maximum de bitcoins, jamais plus</span></div>
+        <div class="kp"><b>100 000 000</b><span>Satoshis (sats) dans 1 BTC</span></div>
+        <div class="kp"><b>210 000 blocs</b><span>Intervalle entre deux halvings (~4 ans)</span></div>
+      </div>
+
+      <h2 id="utxo">Le modèle UTXO : des billets, pas un solde</h2>
+      <p>Bitcoin ne stocke pas de « solde » par compte. Il garde une liste de <strong>sorties de transactions non dépensées</strong> (UTXO, <em>Unspent Transaction Outputs</em>). Ton solde est simplement la somme des UTXO que tes clés peuvent dépenser.</p>
+      <div class="callout analogy">
+        <span class="t">Analogie</span>
+        <p>Les UTXO sont comme des billets dans un portefeuille. Pour payer 7 € avec un billet de 10 €, tu donnes le billet entier et on te rend 3 € de <strong>monnaie</strong>. Une transaction Bitcoin fait pareil : elle consomme des UTXO entiers et en crée de nouveaux, dont un de « change » qui revient vers toi.</p>
+      </div>
+      <pre class="code"><span class="c">// Alice possède un UTXO de 0,5 BTC et veut payer 0,2 BTC à Bob</span>
+Entrée  : UTXO Alice      0,5000 BTC   <span class="c">(signé avec la clé d'Alice)</span>
+Sorties : → Bob           0,2000 BTC
+          → Alice (change) 0,2995 BTC
+Frais   : 0,5 − 0,2 − 0,2995 = <span class="n">0,0005 BTC</span>  <span class="c">→ pour le mineur</span></pre>
+
+      <h2 id="frais">Les frais et la mempool</h2>
+      <p>Un bloc a une taille limitée (environ 4 millions d'unités de poids, soit en pratique 1 à 2 Mo). Quand beaucoup de monde veut transacter, les utilisateurs se font concurrence : les mineurs choisissent en priorité les transactions qui paient le plus de <strong>sats par vbyte</strong>. Les frais ne dépendent donc pas du montant envoyé, mais de la <strong>taille</strong> de la transaction en octets et de l'encombrement du réseau.</p>
+
+      <h2 id="halving">Le halving et la politique monétaire</h2>
+      <p>Tous les 210 000 blocs, la récompense des mineurs est <strong>divisée par deux</strong>. C'est écrit dans le code depuis le premier jour. Le dernier halving a eu lieu en <strong>avril 2024</strong> (passage de 6,25 à 3,125 BTC par bloc) ; le prochain est attendu vers 2028.</p>
+
+      <div class="panel corners demo" id="demo-halving">
+        <div class="demo-title">Démo · Récompense de bloc par époque</div>
+        <div class="bars" id="halving-bars"></div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead><tr><th>Début</th><th>Récompense</th><th>Offre cumulée en fin d'époque</th><th>% des 21 M</th></tr></thead>
+            <tbody id="halving-supply"></tbody>
+          </table>
+        </div>
+        <p class="demo-note">* Dates futures approximatives. Les derniers satoshis seront minés vers 2140 ; ensuite, les mineurs ne vivront plus que des frais de transaction.</p>
+      </div>
+
+      <h2 id="script">Bitcoin Script et Taproot</h2>
+      <p>Bitcoin possède un petit langage, <strong>Script</strong>, qui définit les conditions pour dépenser un UTXO : « une signature de cette clé », « 2 signatures parmi 3 clés », « pas avant telle date »… Il est volontairement <strong>non Turing-complet</strong> (pas de boucles) pour limiter les risques. La mise à jour <strong>Taproot</strong> (2021) a ajouté les signatures Schnorr et rendu les scripts complexes plus discrets et moins chers.</p>
+
+      <h2 id="lightning">Lightning Network : le layer 2 de Bitcoin</h2>
+      <p>Avec environ 7 transactions par seconde, Bitcoin ne peut pas gérer tous les paiements du quotidien sur sa chaîne principale. Le <strong>Lightning Network</strong> ajoute une couche au-dessus :</p>
+      <ol>
+        <li>Deux personnes ouvrent un <strong>canal de paiement</strong> en bloquant des BTC dans une adresse multisig (1 transaction on-chain).</li>
+        <li>Elles s'échangent ensuite des milliers de paiements <strong>hors chaîne</strong>, instantanés et quasi gratuits, en mettant à jour un état signé par les deux.</li>
+        <li>Les paiements peuvent transiter par plusieurs canaux (routage) pour atteindre n'importe qui sur le réseau.</li>
+        <li>À la fermeture, seul l'état final est inscrit sur Bitcoin.</li>
+      </ol>
+      <p>C'est un premier exemple du principe qu'on retrouvera au module 11 : <strong>exécuter ailleurs, régler sur la chaîne principale</strong>.</p>
+
+      <h2 id="ecosysteme">L'écosystème autour de Bitcoin</h2>
+      <ul>
+        <li><strong>Ordinals & Runes</strong> (2023-2024) : inscription de données (images, tokens) dans des satoshis, qui ont relancé le débat sur l'usage de l'espace des blocs.</li>
+        <li><strong>ETF Bitcoin au comptant</strong> : autorisés aux États-Unis en janvier 2024, ils permettent une exposition au BTC via la bourse traditionnelle.</li>
+        <li><strong>Sidechains et L2</strong> (Liquid, Stacks, Rootstock…) : apportent plus de fonctionnalités, avec des compromis de sécurité variables.</li>
+      </ul>
+
+      <div class="panel quiz" data-quiz>
+        <h2>Quiz</h2>
+        <div class="q" data-answer="1">
+          <p>Qu'est-ce qu'un UTXO ?</p>
+          <div class="opts">
+            <button class="opt">Un type de wallet</button>
+            <button class="opt">Une sortie de transaction non dépensée, comparable à un billet</button>
+            <button class="opt">Un mineur de Bitcoin</button>
+          </div>
+          <p class="explain">Une transaction consomme des UTXO entiers et en crée de nouveaux, dont souvent un « change » pour l'expéditeur.</p>
+        </div>
+        <div class="q" data-answer="2">
+          <p>Quelle est la récompense de bloc depuis le halving d'avril 2024 ?</p>
+          <div class="opts">
+            <button class="opt">50 BTC</button>
+            <button class="opt">6,25 BTC</button>
+            <button class="opt">3,125 BTC</button>
+          </div>
+          <p class="explain">50 → 25 → 12,5 → 6,25 → 3,125. Prochaine étape : 1,5625 BTC vers 2028.</p>
+        </div>
+        <div class="q" data-answer="0">
+          <p>De quoi dépendent principalement les frais d'une transaction Bitcoin ?</p>
+          <div class="opts">
+            <button class="opt">De sa taille en octets et de l'encombrement du réseau</button>
+            <button class="opt">Du montant envoyé</button>
+            <button class="opt">De la distance géographique</button>
+          </div>
+          <p class="explain">Envoyer 1 000 BTC peut coûter le même prix qu'envoyer 0,001 BTC.</p>
+        </div>
+      </div>
+
+    </article>
+  </div>
+</main>
+<script src="../js/sha256.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/demos.js"></script>
+</body>
+</html>

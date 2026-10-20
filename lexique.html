@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lexique crypto — Blockverse Academy</title>
+  <meta name="description" content="Plus de 60 termes de la crypto et de la blockchain expliqués simplement.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="lexique" data-base="">
+<main>
+  <section class="section" style="padding-top:70px">
+    <div class="container">
+      <span class="kicker">Base de connaissances</span>
+      <h1 class="section-title" style="font-size:clamp(2rem,5vw,3.2rem)"><span class="gradient-text">Lexique</span> crypto</h1>
+      <p class="lead">Tous les termes du parcours, expliqués en une ou deux phrases. Le numéro indique le module où le concept est détaillé.</p>
+      <input class="input" id="search" type="search" placeholder="> Rechercher un terme…" style="margin-top:24px;max-width:520px" aria-label="Rechercher un terme">
+      <div class="letters" id="letters"></div>
+      <dl class="glossary" id="glossary"></dl>
+      <p class="demo-note" id="empty" hidden>Aucun terme ne correspond.</p>
+    </div>
+  </section>
+</main>
+<script src="js/sha256.js"></script>
+<script src="js/main.js"></script>
+<script>
+const TERMS = [
+  ["51 % (attaque des)", "04", "Situation où un acteur contrôle la majorité de la puissance de minage ou du stake et peut réorganiser les blocs récents."],
+  ["Account abstraction", "05", "Possibilité d'utiliser un smart contract comme compte (smart wallet) : récupération sociale, gas sponsorisé, passkeys (ERC-4337, EIP-7702)."],
+  ["Adresse", "05", "Identifiant public dérivé de la clé publique, que l'on partage pour recevoir des fonds (bc1q…, 0x…)."],
+  ["Airdrop", "13", "Distribution gratuite de tokens. Prétexte très utilisé par les arnaques de type drainer."],
+  ["AMM", "10", "Automated Market Maker : échange décentralisé fondé sur une pool de liquidité et une formule (x·y=k) plutôt qu'un carnet d'ordres."],
+  ["Approve", "09", "Fonction ERC-20 qui autorise un contrat à dépenser tes tokens jusqu'à un certain montant."],
+  ["Arbre de Merkle", "02", "Structure qui résume des milliers de transactions en un seul hash (la racine de Merkle)."],
+  ["Blob", "07", "Espace de données temporaire et bon marché introduit par EIP-4844 sur Ethereum, utilisé par les rollups."],
+  ["Bloc", "03", "Paquet de transactions accompagné d'un en-tête qui contient notamment le hash du bloc précédent."],
+  ["Bloc genèse", "01", "Tout premier bloc d'une blockchain. Celui de Bitcoin a été miné le 3 janvier 2009."],
+  ["Blockchain", "03", "Registre distribué, en ajout seul, composé de blocs chaînés cryptographiquement."],
+  ["Bridge", "12", "Protocole permettant de transférer de la valeur ou des messages entre deux blockchains."],
+  ["Clé privée", "02", "Nombre secret de 256 bits qui permet de signer des transactions. Qui la détient possède les fonds."],
+  ["Clé publique", "02", "Clé dérivée de la clé privée, qui permet à tous de vérifier les signatures."],
+  ["Cold wallet", "05", "Wallet dont les clés sont conservées hors ligne (hardware wallet, papier)."],
+  ["Confirmation", "03", "Chaque bloc ajouté après celui qui contient ta transaction. Plus il y en a, plus elle est irréversible."],
+  ["Consensus", "04", "Mécanisme qui permet aux nœuds de s'accorder sur un historique unique (PoW, PoS, BFT…)."],
+  ["Custodial", "05", "Service qui garde tes clés à ta place (exchange). « Not your keys, not your coins »."],
+  ["DAO", "08", "Organisation autonome décentralisée, gouvernée par des votes on-chain de détenteurs de tokens."],
+  ["Data availability", "11", "Garantie que les données des transactions sont publiées et accessibles, indispensable à la sécurité des rollups."],
+  ["DeFi", "10", "Finance décentralisée : services financiers réalisés par des smart contracts ouverts à tous."],
+  ["DEX", "10", "Exchange décentralisé où l'on échange directement depuis son wallet (Uniswap, Curve…)."],
+  ["Difficulté", "03", "Paramètre qui fixe la cible de hash à atteindre ; ajusté pour garder un rythme de blocs constant."],
+  ["Double dépense", "01", "Le fait de dépenser deux fois la même unité de monnaie numérique ; problème résolu par la blockchain."],
+  ["Drainer", "13", "Kit d'arnaque qui pousse la victime à signer une autorisation permettant de vider son wallet."],
+  ["EOA", "07", "Externally Owned Account : compte Ethereum contrôlé par une clé privée (ton wallet)."],
+  ["ERC-20", "09", "Standard des tokens fongibles sur Ethereum et les chaînes EVM."],
+  ["ERC-721", "09", "Standard des tokens non fongibles (NFT)."],
+  ["EVM", "07", "Ethereum Virtual Machine : la machine virtuelle qui exécute les smart contracts, devenue un standard multi-chaînes."],
+  ["Finalité", "04", "Moment à partir duquel une transaction ne peut plus être annulée."],
+  ["Flash loan", "10", "Prêt sans garantie qui doit être remboursé dans la même transaction, sinon tout est annulé."],
+  ["Fork", "03", "Divergence de la chaîne, temporaire ou due à un changement de règles (soft fork, hard fork)."],
+  ["Gas", "07", "Unité qui mesure le coût de calcul d'une opération sur Ethereum ; se paie en ETH."],
+  ["Gwei", "07", "Sous-unité de l'ETH : 1 gwei = 0,000000001 ETH. Sert à exprimer le prix du gas."],
+  ["Halving", "06", "Division par deux de la récompense de bloc Bitcoin, tous les 210 000 blocs (~4 ans)."],
+  ["Hard fork", "03", "Changement de règles incompatible avec les anciennes versions du logiciel."],
+  ["Hash", "02", "Empreinte de taille fixe produite par une fonction de hachage, comme SHA-256."],
+  ["Hot wallet", "05", "Wallet dont les clés sont sur un appareil connecté à internet (appli, extension)."],
+  ["Impermanent loss", "10", "Manque à gagner d'un fournisseur de liquidité par rapport à la simple détention, quand les prix divergent."],
+  ["Layer 0", "11", "Infrastructure qui permet de créer et relier des blockchains (Polkadot, Cosmos)."],
+  ["Layer 1", "11", "Blockchain de base avec son propre consensus (Bitcoin, Ethereum, Solana)."],
+  ["Layer 2", "11", "Réseau qui exécute les transactions hors du L1 et hérite de sa sécurité (rollups, Lightning)."],
+  ["Layer 3", "11", "Chaîne spécialisée construite au-dessus d'un L2 pour une application précise."],
+  ["Lightning Network", "06", "Réseau de canaux de paiement au-dessus de Bitcoin, pour des paiements instantanés et quasi gratuits."],
+  ["Liquidation", "10", "Vente forcée de la garantie d'un emprunteur DeFi quand son facteur de santé passe sous 1."],
+  ["Liquid staking", "09", "Staking qui fournit en échange un token utilisable en DeFi (stETH, rETH)."],
+  ["Mempool", "03", "File d'attente des transactions diffusées mais pas encore incluses dans un bloc."],
+  ["MEV", "13", "Maximal Extractable Value : profit tiré de l'ordre des transactions dans un bloc (arbitrage, sandwich…)."],
+  ["MiCA", "09", "Règlement européen sur les marchés de crypto-actifs, applicable depuis 2024."],
+  ["Minage", "03", "Recherche par force brute d'un nonce donnant un hash valide, en Proof of Work."],
+  ["Multisig", "05", "Adresse ou wallet qui exige plusieurs signatures (ex. 2 sur 3) pour dépenser."],
+  ["NFT", "09", "Non-Fungible Token : token unique servant de certificat de propriété numérique."],
+  ["Nœud", "03", "Ordinateur qui conserve une copie de la blockchain et vérifie les règles."],
+  ["Nonce", "03", "Nombre que l'on fait varier pour miner un bloc ; sur Ethereum, c'est aussi le compteur de transactions d'un compte."],
+  ["Optimistic rollup", "11", "Rollup qui publie ses états sans preuve, contestables pendant ~7 jours par preuve de fraude."],
+  ["Oracle", "12", "Service qui fournit des données extérieures (prix, événements) aux smart contracts."],
+  ["Permit", "13", "Signature hors chaîne qui vaut autorisation de dépense ; utile mais exploitée par les drainers."],
+  ["Proof of Stake", "04", "Consensus où les validateurs bloquent des cryptos en garantie et risquent le slashing."],
+  ["Proof of Work", "04", "Consensus où les mineurs dépensent de l'énergie pour calculer des hashes."],
+  ["Pool de liquidité", "10", "Réserve de deux tokens (ou plus) dans un smart contract, utilisée par un AMM."],
+  ["Revert", "08", "Annulation complète d'une transaction quand une condition du contrat n'est pas remplie."],
+  ["Rollup", "11", "Layer 2 qui regroupe les transactions en lots et publie leurs données sur le L1."],
+  ["Rug pull", "13", "Arnaque où les créateurs d'un projet retirent la liquidité et disparaissent."],
+  ["Satoshi", "06", "Plus petite unité du bitcoin : 1 BTC = 100 000 000 sats."],
+  ["Seed phrase", "05", "Liste de 12 ou 24 mots qui permet de régénérer toutes les clés d'un wallet. À protéger absolument."],
+  ["Séquenceur", "11", "Entité qui ordonne et exécute les transactions d'un rollup avant de les publier sur le L1."],
+  ["SHA-256", "02", "Fonction de hachage utilisée par Bitcoin, produisant une empreinte de 256 bits."],
+  ["Sidechain", "11", "Blockchain parallèle reliée à une autre, mais avec sa propre sécurité."],
+  ["Signature numérique", "02", "Preuve cryptographique qu'un message a été autorisé par le détenteur d'une clé privée."],
+  ["Slashing", "04", "Destruction d'une partie de la mise d'un validateur qui enfreint les règles."],
+  ["Slippage", "13", "Écart entre le prix attendu et le prix d'exécution d'un swap ; on fixe une tolérance maximale."],
+  ["Smart contract", "08", "Programme déployé sur une blockchain, qui s'exécute automatiquement selon son code."],
+  ["Solidity", "08", "Langage de programmation principal des smart contracts sur les chaînes EVM."],
+  ["Stablecoin", "09", "Token conçu pour garder une valeur stable, généralement 1 dollar ou 1 euro."],
+  ["Staking", "04", "Fait de bloquer des cryptos pour participer à la validation d'un réseau PoS et toucher des récompenses."],
+  ["Token", "09", "Actif créé par un smart contract sur une blockchain existante."],
+  ["Trilemme", "11", "Difficulté d'obtenir à la fois décentralisation, sécurité et scalabilité."],
+  ["TVL", "10", "Total Value Locked : valeur totale des actifs déposés dans un protocole DeFi."],
+  ["UTXO", "06", "Unspent Transaction Output : « billet » non dépensé dans le modèle de Bitcoin."],
+  ["Validateur", "04", "Participant qui propose et atteste les blocs dans un réseau Proof of Stake."],
+  ["Wrapped token", "12", "Représentation d'un actif sur une autre chaîne ou dans un autre format (WBTC, WETH)."],
+  ["ZK-proof", "11", "Preuve à divulgation nulle de connaissance : prouve qu'un calcul est correct sans révéler les données."],
+  ["ZK-rollup", "11", "Rollup qui accompagne chaque lot d'une preuve ZK de validité vérifiée par le L1."]
+];
+const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const slugs = Object.fromEntries(MODULES.map(m => [m.id, m.slug]));
+const gl = document.getElementById("glossary"), search = document.getElementById("search"),
+      lettersEl = document.getElementById("letters"), empty = document.getElementById("empty");
+let letter = "";
+TERMS.sort((a, b) => norm(a[0]).localeCompare(norm(b[0])));
+const firstChar = t => { const c = norm(t)[0]; return /[a-z]/.test(c) ? c.toUpperCase() : "#"; };
+const letters = [...new Set(TERMS.map(t => firstChar(t[0])))];
+lettersEl.innerHTML = `<button class="on" data-l="">★</button>` + letters.map(l => `<button data-l="${l}">${l}</button>`).join("");
+lettersEl.addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  letter = b.dataset.l;
+  lettersEl.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+  render();
+});
+function render() {
+  const q = norm(search.value.trim());
+  const list = TERMS.filter(([t, , d]) => (!letter || firstChar(t) === letter) && (!q || norm(t).includes(q) || norm(d).includes(q)));
+  gl.innerHTML = list.map(([t, m, d]) => `
+    <div class="panel term"><dt><a class="tag" href="modules/${slugs[m]}.html">MOD ${m} →</a>${t}</dt><dd>${d}</dd></div>`).join("");
+  empty.hidden = list.length > 0;
+}
+search.addEventListener("input", render);
+render();
+</script>
+</body>
+</html>

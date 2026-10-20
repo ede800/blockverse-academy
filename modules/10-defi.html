@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>La finance décentralisée (DeFi) — Blockverse Academy</title>
+  <meta name="description" content="AMM, pools de liquidité, impermanent loss, prêts, liquidations, flash loans : la DeFi expliquée avec une démo x·y=k.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-module="10" data-base="../">
+<main>
+  <div class="container article-layout">
+    <article class="article">
+
+      <h2 id="principe">La banque, réécrite en smart contracts</h2>
+      <p>La <strong>DeFi</strong> (<em>Decentralized Finance</em>) reproduit les services financiers — échanger, prêter, emprunter, épargner, s'assurer — avec des smart contracts ouverts à tous, sans guichet ni intermédiaire. Les protocoles s'emboîtent comme des Lego : un token reçu sur l'un peut servir de garantie sur un autre dans la même transaction.</p>
+      <div class="key-points">
+        <div class="kp"><b>DEX</b><span>Échanges décentralisés (Uniswap, Curve…)</span></div>
+        <div class="kp"><b>Lending</b><span>Prêts et emprunts (Aave, Compound, Morpho…)</span></div>
+        <div class="kp"><b>Stablecoins</b><span>Monnaies stables émises on-chain (Sky/DAI…)</span></div>
+        <div class="kp"><b>Dérivés</b><span>Contrats perpétuels, options</span></div>
+        <div class="kp"><b>Staking liquide</b><span>Staker tout en gardant un token utilisable (Lido…)</span></div>
+      </div>
+
+      <h2 id="amm">Les AMM : un échange sans carnet d'ordres</h2>
+      <p>Une bourse classique met en relation acheteurs et vendeurs via un carnet d'ordres. Un <strong>Automated Market Maker</strong> remplace tout ça par une <strong>réserve de deux tokens</strong> (une <em>pool</em>) et une formule. La plus célèbre, popularisée par Uniswap :</p>
+      <pre class="code" style="text-align:center;font-size:1.2rem"><span class="t">x</span> × <span class="k">y</span> = <span class="s">k</span></pre>
+      <p>où <code>x</code> et <code>y</code> sont les quantités des deux tokens dans la pool. Quand tu ajoutes de l'ETH (x augmente), la pool doit te rendre des USDC (y diminue) pour que le produit reste constant. Le <strong>prix</strong> est simplement le ratio y/x. Plus ta transaction est grosse par rapport à la pool, plus le prix bouge contre toi : c'est l'<strong>impact de prix</strong>.</p>
+
+      <div class="panel corners demo" id="demo-amm">
+        <div class="demo-title">Démo · Pool ETH / USDC</div>
+        <div class="pool">
+          <div class="tank"><div class="vessel"><div class="liquid" id="amm-la"></div></div><span id="amm-ta"></span></div>
+          <span class="k-sign">×</span>
+          <div class="tank b"><div class="vessel"><div class="liquid" id="amm-lb"></div></div><span id="amm-tb"></span></div>
+          <span class="k-sign">= k</span>
+        </div>
+        <p class="stat" id="amm-info" style="text-align:center"></p>
+        <div class="demo-row">
+          <div>
+            <label for="amm-dir">Je vends</label>
+            <select class="input" id="amm-dir"><option value="eth">ETH → USDC</option><option value="usdc">USDC → ETH</option></select>
+          </div>
+          <div>
+            <label for="amm-amount">Montant</label>
+            <input class="input" id="amm-amount" type="number" value="5" min="0">
+          </div>
+        </div>
+        <div class="hash-out" id="amm-preview" style="color:var(--text)"></div>
+        <div class="btn-row"><button class="btn small" id="amm-swap">⇄ Swap</button><button class="btn small magenta" id="amm-reset">Réinitialiser la pool</button></div>
+        <p class="demo-note">Essaie de vendre 5 ETH, puis 50 ETH : l'impact de prix explose. Après plusieurs swaps dans le même sens, le prix de la pool s'éloigne du marché… et les arbitragistes viennent le corriger en empochant la différence.</p>
+      </div>
+
+      <h2 id="lp">Fournir de la liquidité</h2>
+      <p>Les tokens de la pool viennent des <strong>fournisseurs de liquidité</strong> (LP). Ils déposent les deux tokens en proportion égale de valeur et touchent en échange une part des <strong>frais</strong> de chaque swap (souvent 0,05 % à 1 %).</p>
+      <div class="callout warn">
+        <span class="t">Impermanent loss (perte non permanente)</span>
+        <p>Si le prix d'un des tokens varie fortement, la pool se rééquilibre automatiquement : elle vend le token qui monte et achète celui qui baisse. Résultat, le LP finit avec <strong>moins de valeur que s'il avait simplement gardé ses tokens</strong>. Si le prix doublait, la perte serait d'environ 5,7 % par rapport à la détention simple. Les frais doivent compenser cette perte pour que l'opération soit rentable.</p>
+      </div>
+
+      <h2 id="lending">Prêter et emprunter</h2>
+      <p>Sur un protocole de prêt, les déposants fournissent des tokens et touchent des intérêts ; les emprunteurs empruntent en déposant une <strong>garantie supérieure</strong> au montant emprunté (sur-collatéralisation), car le protocole ne connaît pas leur identité et ne peut pas les poursuivre.</p>
+      <ul>
+        <li>Les <strong>taux</strong> sont algorithmiques : plus une pool est utilisée, plus le taux monte.</li>
+        <li>Le <strong>facteur de santé</strong> mesure le rapport garantie / dette. S'il passe sous 1…</li>
+        <li>… c'est la <strong>liquidation</strong> : n'importe qui peut rembourser une partie de ta dette et récupérer ta garantie avec une décote (5 à 10 %). C'est ce qui protège les prêteurs.</li>
+      </ul>
+      <pre class="code"><span class="c">// Exemple</span>
+Garantie : 10 ETH à 3 000 $ = 30 000 $   (seuil de liquidation : 80 %)
+Dette    : 20 000 $ USDC
+Santé    = 30 000 × 0,80 / 20 000 = <span class="s">1,20</span>   <span class="c">→ OK</span>
+L'ETH tombe à 2 500 $ → 25 000 × 0,80 / 20 000 = <span class="k">1,00</span>  <span class="c">→ liquidation !</span></pre>
+
+      <h2 id="flash">Les flash loans : emprunter des millions pour 12 secondes</h2>
+      <p>Spécificité unique de la DeFi : un <strong>flash loan</strong> permet d'emprunter n'importe quel montant <strong>sans garantie</strong>, à condition de rembourser <strong>dans la même transaction</strong>. Si le remboursement échoue, toute la transaction est annulée comme si rien ne s'était passé (atomicité). Utilisé pour l'arbitrage, les refinancements… et de nombreuses attaques par manipulation de prix.</p>
+
+      <h2 id="yield">D'où vient le rendement ?</h2>
+      <p>Toujours se poser la question : <strong>qui paie ?</strong> Les sources saines sont les frais de swap, les intérêts payés par les emprunteurs, les récompenses de staking. Un rendement élevé financé uniquement par l'émission d'un token inflationniste (« yield farming ») a tendance à disparaître… avec le prix du token.</p>
+      <div class="callout danger">
+        <span class="t">Règle d'or</span>
+        <p>Si un rendement paraît trop beau pour être vrai et que tu ne sais pas d'où il vient, c'est <strong>toi</strong> le rendement.</p>
+      </div>
+
+      <h2 id="risques">Les risques de la DeFi</h2>
+      <ul>
+        <li><strong>Risque de smart contract</strong> : bugs, failles (des milliards ont été perdus en hacks).</li>
+        <li><strong>Risque d'oracle</strong> : un prix manipulé peut déclencher des liquidations injustes.</li>
+        <li><strong>Risque de gouvernance</strong> : un détenteur majoritaire de tokens peut voter une proposition malveillante.</li>
+        <li><strong>Risque de dépeg</strong> : un stablecoin ou un token de staking peut perdre sa parité.</li>
+        <li><strong>Risque de composabilité</strong> : la faille d'un protocole se propage à tous ceux qui en dépendent.</li>
+      </ul>
+
+      <div class="panel quiz" data-quiz>
+        <h2>Quiz</h2>
+        <div class="q" data-answer="1">
+          <p>Dans un AMM x·y=k, pourquoi un gros swap obtient-il un moins bon prix ?</p>
+          <div class="opts">
+            <button class="opt">Parce que les frais sont progressifs</button>
+            <button class="opt">Parce qu'il déséquilibre fortement la pool : c'est l'impact de prix</button>
+            <button class="opt">Parce que le validateur prend une commission</button>
+          </div>
+          <p class="explain">Plus la pool est profonde (liquide), plus l'impact d'un même montant est faible.</p>
+        </div>
+        <div class="q" data-answer="0">
+          <p>Pourquoi les prêts DeFi sont-ils sur-collatéralisés ?</p>
+          <div class="opts">
+            <button class="opt">Parce que le protocole ne connaît pas l'emprunteur et ne peut pas le poursuivre en cas de défaut</button>
+            <button class="opt">Pour payer les validateurs</button>
+            <button class="opt">C'est imposé par la loi</button>
+          </div>
+          <p class="explain">La garantie est la seule protection des prêteurs ; la liquidation est automatique.</p>
+        </div>
+        <div class="q" data-answer="2">
+          <p>Qu'est-ce qu'un flash loan ?</p>
+          <div class="opts">
+            <button class="opt">Un prêt à taux zéro sur un an</button>
+            <button class="opt">Un prêt bancaire accordé en un clic</button>
+            <button class="opt">Un prêt sans garantie qui doit être remboursé dans la même transaction</button>
+          </div>
+          <p class="explain">Sans remboursement, la transaction entière est annulée : le prêteur ne prend aucun risque de crédit.</p>
+        </div>
+      </div>
+
+    </article>
+  </div>
+</main>
+<script src="../js/sha256.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/demos.js"></script>
+</body>
+</html>

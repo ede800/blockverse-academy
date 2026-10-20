@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tokens, stablecoins & NFT — Blockverse Academy</title>
+  <meta name="description" content="ERC-20, ERC-721, stablecoins, tokens de gouvernance et actifs réels tokenisés expliqués.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-module="09" data-base="../">
+<main>
+  <div class="container article-layout">
+    <article class="article">
+
+      <h2 id="token">Un token, c'est un tableau dans un contrat</h2>
+      <p>Un token n'est pas un objet qui « se déplace ». C'est une <strong>ligne dans le stockage d'un smart contract</strong> : un dictionnaire <code>adresse → solde</code>. Quand tu « envoies » 100 USDC, tu appelles en réalité la fonction <code>transfer</code> du contrat USDC, qui diminue ton solde et augmente celui du destinataire.</p>
+      <div class="callout warn">
+        <span class="t">Conséquence pratique</span>
+        <p>Même pour envoyer un token, il faut payer le gas avec la <strong>monnaie native</strong> de la chaîne (ETH sur Ethereum). Un wallet avec 1 000 USDC et 0 ETH ne peut rien envoyer — sauf via un smart wallet qui sponsorise le gas.</p>
+      </div>
+
+      <h2 id="standards">Les standards ERC</h2>
+      <p>Pour que tous les wallets et applications comprennent tous les tokens, Ethereum définit des interfaces standard (<em>Ethereum Request for Comments</em>).</p>
+      <div class="table-wrap">
+      <table class="data">
+        <tr><th>Standard</th><th>Type</th><th>Exemples</th></tr>
+        <tr><td><strong>ERC-20</strong></td><td>Fongible : chaque unité est identique et divisible</td><td>USDC, UNI, LINK, WETH</td></tr>
+        <tr><td><strong>ERC-721</strong></td><td>Non fongible (NFT) : chaque token a un identifiant unique</td><td>Œuvres d'art, noms ENS, billets</td></tr>
+        <tr><td><strong>ERC-1155</strong></td><td>Multi-tokens : fongibles et non fongibles dans un même contrat</td><td>Objets de jeu vidéo</td></tr>
+        <tr><td><strong>ERC-4626</strong></td><td>Coffres de rendement standardisés</td><td>Parts de vaults DeFi</td></tr>
+      </table>
+      </div>
+<pre class="code"><span class="c">// L'interface ERC-20 (simplifiée)</span>
+<span class="k">interface</span> <span class="t">IERC20</span> {
+    <span class="k">function</span> totalSupply() <span class="k">external view returns</span> (<span class="t">uint256</span>);
+    <span class="k">function</span> balanceOf(<span class="t">address</span> compte) <span class="k">external view returns</span> (<span class="t">uint256</span>);
+    <span class="k">function</span> transfer(<span class="t">address</span> a, <span class="t">uint256</span> montant) <span class="k">external returns</span> (<span class="t">bool</span>);
+    <span class="k">function</span> approve(<span class="t">address</span> spender, <span class="t">uint256</span> montant) <span class="k">external returns</span> (<span class="t">bool</span>);
+    <span class="k">function</span> transferFrom(<span class="t">address</span> de, <span class="t">address</span> a, <span class="t">uint256</span> montant) <span class="k">external returns</span> (<span class="t">bool</span>);
+}</pre>
+
+      <h3>approve + transferFrom : le duo à comprendre</h3>
+      <p>Pour qu'un DEX puisse prendre tes tokens lors d'un swap, tu dois d'abord l'<strong>autoriser</strong> (<code>approve</code>) à dépenser un certain montant. Le DEX appelle ensuite <code>transferFrom</code>. Beaucoup d'applications demandent une autorisation <strong>illimitée</strong> : si le contrat est piraté ou malveillant, il peut vider tes tokens. Pense à révoquer les autorisations inutiles (outils de type « revoke »).</p>
+
+      <h2 id="stablecoins">Les stablecoins</h2>
+      <p>Des tokens conçus pour valoir une valeur stable, généralement <strong>1 dollar</strong> (ou 1 euro). Ils sont la colonne vertébrale de la DeFi et des paiements crypto.</p>
+      <div class="table-wrap">
+      <table class="data">
+        <tr><th>Mécanisme</th><th>Fonctionnement</th><th>Exemples</th><th>Risque principal</th></tr>
+        <tr><td>Adossé à du fiat</td><td>Une entreprise détient 1 $ (cash, bons du Trésor) pour chaque token émis</td><td>USDC, USDT, EURC</td><td>Confiance dans l'émetteur, gel possible des fonds</td></tr>
+        <tr><td>Sur-collatéralisé crypto</td><td>On dépose par ex. 150 $ d'ETH pour emprunter 100 $ de stablecoin</td><td>DAI / USDS</td><td>Chute brutale du collatéral</td></tr>
+        <tr><td>Algorithmique</td><td>Un algorithme crée/détruit des tokens pour tenir le prix, sans réserve solide</td><td>(UST/Terra, effondré en mai 2022)</td><td>Spirale de la mort</td></tr>
+        <tr><td>Synthétique / delta-neutre</td><td>Collatéral crypto couvert par des positions short sur dérivés</td><td>USDe</td><td>Taux de financement négatifs, contrepartie</td></tr>
+      </table>
+      </div>
+      <p>En Europe, le règlement <strong>MiCA</strong> encadre les émetteurs de stablecoins depuis 2024 ; aux États-Unis, la loi <strong>GENIUS Act</strong> (2025) a posé un cadre fédéral pour les stablecoins de paiement.</p>
+
+      <h2 id="nft">Les NFT, au-delà des images de singes</h2>
+      <p>Un NFT est un <strong>certificat de propriété unique</strong> sur la blockchain. Le plus souvent, l'image elle-même n'est pas stockée on-chain : le token contient un lien vers des métadonnées (sur IPFS ou un serveur). Acheter un NFT ne donne pas automatiquement de droits d'auteur sur l'œuvre.</p>
+      <p>Usages au-delà de l'art : billets d'événements, noms de domaine (ENS), diplômes et certifications, objets de jeu, positions de liquidité (Uniswap v3), adhésion à une communauté.</p>
+
+      <h2 id="autres">Autres familles de tokens</h2>
+      <ul>
+        <li><strong>Gouvernance</strong> (UNI, AAVE…) : droit de vote sur l'évolution d'un protocole.</li>
+        <li><strong>Liquid staking</strong> (stETH, rETH) : représentent de l'ETH staké, tout en restant utilisables en DeFi.</li>
+        <li><strong>Wrapped</strong> (WETH, WBTC) : version ERC-20 d'un actif natif ou d'un actif d'une autre chaîne.</li>
+        <li><strong>RWA</strong> (<em>Real World Assets</em>) : obligations d'État, fonds monétaires, immobilier tokenisés par des institutions financières.</li>
+        <li><strong>Memecoins</strong> : tokens sans utilité autre que spéculative ou communautaire. Extrêmement risqués.</li>
+      </ul>
+
+      <h2 id="tokenomics">Lire une tokenomics</h2>
+      <p>Avant de s'intéresser à un token, quelques questions essentielles :</p>
+      <ul>
+        <li><strong>Offre</strong> : quelle quantité existe aujourd'hui (circulante) et au maximum ? Y a-t-il de l'inflation ?</li>
+        <li><strong>Répartition</strong> : quelle part est détenue par l'équipe et les investisseurs ? Quand sont-ils débloqués (<em>vesting</em>) ?</li>
+        <li><strong>Utilité</strong> : à quoi sert le token concrètement ? Le protocole fonctionnerait-il sans lui ?</li>
+        <li><strong>Contrôle</strong> : le contrat permet-il de minter à volonté, de geler des comptes, de bloquer les ventes ?</li>
+      </ul>
+
+      <div class="panel quiz" data-quiz>
+        <h2>Quiz</h2>
+        <div class="q" data-answer="0">
+          <p>Quelle est la différence entre ERC-20 et ERC-721 ?</p>
+          <div class="opts">
+            <button class="opt">ERC-20 est fongible, ERC-721 est non fongible (unique)</button>
+            <button class="opt">ERC-721 est plus récent et remplace ERC-20</button>
+            <button class="opt">ERC-20 fonctionne uniquement sur Bitcoin</button>
+          </div>
+          <p class="explain">1 USDC = 1 USDC, mais le NFT #42 n'est pas interchangeable avec le #43.</p>
+        </div>
+        <div class="q" data-answer="1">
+          <p>Pourquoi les autorisations illimitées (approve) sont-elles risquées ?</p>
+          <div class="opts">
+            <button class="opt">Elles coûtent très cher en gas</button>
+            <button class="opt">Un contrat piraté ou malveillant pourrait dépenser tous tes tokens</button>
+            <button class="opt">Elles expirent au bout d'un jour</button>
+          </div>
+          <p class="explain">Accorde des montants limités et révoque régulièrement les autorisations inutiles.</p>
+        </div>
+        <div class="q" data-answer="2">
+          <p>Quel type de stablecoin s'est effondré avec Terra en 2022 ?</p>
+          <div class="opts">
+            <button class="opt">Adossé au dollar</button>
+            <button class="opt">Sur-collatéralisé</button>
+            <button class="opt">Algorithmique</button>
+          </div>
+          <p class="explain">UST n'avait pas de réserve solide : la confiance a disparu et le mécanisme s'est emballé.</p>
+        </div>
+      </div>
+
+    </article>
+  </div>
+</main>
+<script src="../js/sha256.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/demos.js"></script>
+</body>
+</html>

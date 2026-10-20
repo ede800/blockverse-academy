@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ethereum & l'EVM — Blockverse Academy</title>
+  <meta name="description" content="Comptes, gas, EVM, EIP-1559, The Merge : comprendre Ethereum, l'ordinateur mondial.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-module="07" data-base="../">
+<main>
+  <div class="container article-layout">
+    <article class="article">
+
+      <h2 id="idee">De la monnaie à l'ordinateur mondial</h2>
+      <p>En 2013, <strong>Vitalik Buterin</strong>, alors âgé de 19 ans, propose une idée : et si une blockchain ne stockait pas seulement des transferts, mais <strong>n'importe quel programme</strong> ? Ethereum est lancé en juillet 2015. C'est une machine d'état partagée : un ordinateur unique, exécuté à l'identique par des milliers de nœuds, que personne ne peut éteindre.</p>
+      <div class="callout analogy">
+        <span class="t">Analogie</span>
+        <p>Si Bitcoin est une calculatrice très fiable, Ethereum est un <strong>ordinateur public</strong> sur lequel chacun peut installer des applications (les smart contracts), que tout le monde peut utiliser et dont personne ne peut modifier les règles en douce.</p>
+      </div>
+
+      <h2 id="comptes">Deux types de comptes</h2>
+      <p>Contrairement à Bitcoin (UTXO), Ethereum utilise un modèle de <strong>comptes avec un solde</strong>, comme une banque.</p>
+      <div class="demo-row">
+        <div class="callout"><span class="t">EOA — compte externe</span><p>Contrôlé par une clé privée (ton wallet). Peut initier des transactions. N'a pas de code.</p></div>
+        <div class="callout"><span class="t">Compte de contrat</span><p>Contrôlé par son code (un smart contract). Ne peut agir que lorsqu'on l'appelle. Possède un solde et un stockage.</p></div>
+      </div>
+      <p>Chaque compte a un <strong>nonce</strong> (compteur de transactions, qui empêche de rejouer une transaction), un <strong>solde</strong> en ETH, et pour les contrats, du <strong>code</strong> et un <strong>stockage</strong>.</p>
+
+      <h2 id="evm">L'EVM : la machine virtuelle d'Ethereum</h2>
+      <p>L'<strong>Ethereum Virtual Machine</strong> exécute le bytecode des smart contracts. Elle est déterministe : la même transaction, appliquée au même état, donne exactement le même résultat sur tous les nœuds du monde. L'EVM est devenue un <strong>standard</strong> : Arbitrum, Optimism, Base, Polygon, BNB Chain, Avalanche C-Chain… sont « compatibles EVM », ce qui permet de réutiliser les mêmes contrats et les mêmes wallets.</p>
+
+      <h2 id="gas">Le gas : le carburant du calcul</h2>
+      <p>Chaque opération de l'EVM coûte une quantité fixe de <strong>gas</strong> (une addition : 3 gas, écrire une nouvelle valeur en stockage : 20 000 gas, un simple transfert d'ETH : 21 000 gas). Le gas a deux rôles :</p>
+      <ul>
+        <li><strong>Payer</strong> les validateurs pour le calcul et le stockage.</li>
+        <li><strong>Empêcher les boucles infinies</strong> : un programme qui tourne trop longtemps tombe à court de gas et s'arrête.</li>
+      </ul>
+      <p>Depuis la mise à jour <strong>EIP-1559</strong> (août 2021), le prix du gas comporte une <strong>base fee</strong> fixée par le protocole selon l'encombrement — et <strong>brûlée</strong> (détruite) — plus un <strong>pourboire</strong> (priority fee) versé au validateur.</p>
+
+      <div class="panel corners demo" id="demo-gas">
+        <div class="demo-title">Démo · Combien coûte une transaction ?</div>
+        <div class="demo-row">
+          <div>
+            <label for="gas-op">Opération</label>
+            <select class="input" id="gas-op">
+              <option value="21000">Transfert d'ETH (21 000 gas)</option>
+              <option value="65000">Transfert d'un token ERC-20 (~65 000)</option>
+              <option value="150000">Swap sur un DEX (~150 000)</option>
+              <option value="250000">Mint d'un NFT (~250 000)</option>
+              <option value="2000000">Déploiement d'un contrat (~2 000 000)</option>
+            </select>
+          </div>
+          <div>
+            <label for="gas-price">Prix de l'ETH ($)</label>
+            <input class="input" id="gas-price" type="number" value="3000" min="0">
+          </div>
+          <div>
+            <label for="gas-base">Base fee (gwei)</label>
+            <input class="input" id="gas-base" type="number" value="5" min="0" step="0.1">
+          </div>
+          <div>
+            <label for="gas-tip">Pourboire (gwei)</label>
+            <input class="input" id="gas-tip" type="number" value="0.5" min="0" step="0.1">
+          </div>
+        </div>
+        <div class="hash-out" id="gas-out" style="color:var(--text)"></div>
+        <p class="demo-note">1 gwei = 0,000000001 ETH. En période de forte demande, la base fee peut être multipliée par 10 ou 100 : c'est l'une des raisons d'être des layer 2.</p>
+      </div>
+
+      <h2 id="merge">The Merge et le passage au Proof of Stake</h2>
+      <p>Le 15 septembre 2022, Ethereum a basculé du Proof of Work au Proof of Stake sans interruption de service — « changer le moteur d'un avion en plein vol ». Conséquences : consommation d'énergie réduite d'environ 99,9 %, émission d'ETH fortement réduite, et une architecture en deux couches logicielles : le <strong>client d'exécution</strong> (EVM, transactions) et le <strong>client de consensus</strong> (PoS).</p>
+
+      <h2 id="roadmap">La feuille de route : un Ethereum centré sur les rollups</h2>
+      <p>Plutôt que d'augmenter massivement la capacité de la chaîne principale (ce qui rendrait les nœuds trop lourds), Ethereum a choisi de devenir une <strong>couche de règlement et de disponibilité des données</strong> pour les layer 2.</p>
+      <ul>
+        <li><strong>Dencun / EIP-4844</strong> (mars 2024) : introduction des <em>blobs</em>, un espace de données bon marché et temporaire pour les rollups. Les frais sur les L2 ont chuté d'un facteur 10 à 100.</li>
+        <li><strong>Pectra</strong> (mai 2025) : comptes EOA pouvant temporairement agir comme des smart wallets (EIP-7702), validateurs jusqu'à 2048 ETH, davantage de blobs.</li>
+        <li><strong>Fusaka</strong> (fin 2025) : PeerDAS, qui permet aux nœuds de vérifier la disponibilité des données en n'en téléchargeant qu'une partie, pour augmenter encore la capacité en blobs.</li>
+        <li><strong>À plus long terme</strong> : clients « stateless », preuves ZK de l'EVM elle-même, résistance quantique.</li>
+      </ul>
+
+      <h2 id="concurrents">Les autres layer 1 à smart contracts</h2>
+      <div class="table-wrap">
+      <table class="data">
+        <tr><th>Chaîne</th><th>Particularité</th></tr>
+        <tr><td>Solana</td><td>Très haut débit sur une seule chaîne, matériel de validation exigeant, langage Rust</td></tr>
+        <tr><td>BNB Chain</td><td>Compatible EVM, peu de validateurs, frais bas</td></tr>
+        <tr><td>Avalanche</td><td>Réseau de sous-chaînes (« L1s ») personnalisables</td></tr>
+        <tr><td>Cardano</td><td>Approche académique, modèle eUTXO</td></tr>
+        <tr><td>Sui, Aptos</td><td>Langage Move, exécution parallèle</td></tr>
+        <tr><td>TON</td><td>Intégration avec la messagerie Telegram</td></tr>
+      </table>
+      </div>
+
+      <div class="panel quiz" data-quiz>
+        <h2>Quiz</h2>
+        <div class="q" data-answer="1">
+          <p>À quoi sert le gas ?</p>
+          <div class="opts">
+            <button class="opt">À stocker l'ETH dans un wallet</button>
+            <button class="opt">À payer le calcul et à empêcher les programmes infinis</button>
+            <button class="opt">À miner de nouveaux ETH</button>
+          </div>
+          <p class="explain">Chaque opération a un coût en gas : un programme qui épuise son gas s'arrête et ses modifications sont annulées.</p>
+        </div>
+        <div class="q" data-answer="0">
+          <p>Que devient la base fee depuis EIP-1559 ?</p>
+          <div class="opts">
+            <button class="opt">Elle est brûlée</button>
+            <button class="opt">Elle va à la Fondation Ethereum</button>
+            <button class="opt">Elle est redistribuée aux détenteurs</button>
+          </div>
+          <p class="explain">Seul le pourboire (priority fee) revient au validateur.</p>
+        </div>
+        <div class="q" data-answer="2">
+          <p>Qu'a apporté la mise à jour Dencun (EIP-4844) ?</p>
+          <div class="opts">
+            <button class="opt">Le passage au Proof of Stake</button>
+            <button class="opt">La limite de 21 millions d'ETH</button>
+            <button class="opt">Les blobs, un espace de données bon marché pour les rollups</button>
+          </div>
+          <p class="explain">Les rollups publient leurs données dans des blobs, ce qui a fait chuter leurs frais.</p>
+        </div>
+      </div>
+
+    </article>
+  </div>
+</main>
+<script src="../js/sha256.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/demos.js"></script>
+</body>
+</html>

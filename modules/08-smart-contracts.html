@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Les smart contracts — Blockverse Academy</title>
+  <meta name="description" content="Qu'est-ce qu'un smart contract ? Solidity, déploiement, appels, events, revert et sécurité, avec un contrat à tester.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-module="08" data-base="../">
+<main>
+  <div class="container article-layout">
+    <article class="article">
+
+      <h2 id="definition">Un contrat… qui n'en est pas vraiment un</h2>
+      <p>Un <strong>smart contract</strong> est un <strong>programme stocké sur une blockchain</strong>, qui s'exécute automatiquement quand on l'appelle, selon des règles fixées à l'avance. Le terme a été inventé par Nick Szabo dans les années 1990, bien avant les blockchains. Ce n'est pas un contrat juridique : c'est du code, et « le code fait loi » — y compris quand il contient un bug.</p>
+      <div class="callout analogy">
+        <span class="t">Analogie : le distributeur automatique</span>
+        <p>Tu insères 2 €, tu appuies sur B4, la machine te donne une canette. Pas besoin de vendeur ni de confiance : les règles sont gravées dans la machine. Un smart contract est un distributeur automatique numérique, ouvert 24h/24, que tout le monde peut inspecter.</p>
+      </div>
+
+      <h2 id="proprietes">Ce qui les rend spéciaux</h2>
+      <div class="key-points">
+        <div class="kp"><b>Immuables</b><span>Une fois déployé, le code ne peut pas être modifié (sauf s'il a été prévu « upgradable »).</span></div>
+        <div class="kp"><b>Transparents</b><span>Le code et l'état sont publics et vérifiables par tous.</span></div>
+        <div class="kp"><b>Sans permission</b><span>N'importe qui peut les appeler, sans compte ni autorisation.</span></div>
+        <div class="kp"><b>Composables</b><span>Un contrat peut en appeler un autre : ce sont des « Lego financiers ».</span></div>
+        <div class="kp"><b>Atomiques</b><span>Une transaction réussit entièrement ou échoue entièrement (revert).</span></div>
+      </div>
+
+      <h2 id="solidity">Lire un contrat Solidity</h2>
+      <p><strong>Solidity</strong> est le langage le plus utilisé sur les chaînes EVM (on trouve aussi Vyper, et Rust ou Move sur d'autres chaînes). Voici une cagnotte : chacun peut déposer, le propriétaire retire si l'objectif est atteint, sinon chacun peut se faire rembourser.</p>
+<pre class="code"><span class="c">// SPDX-License-Identifier: MIT</span>
+<span class="k">pragma solidity</span> ^0.8.24;
+
+<span class="k">contract</span> <span class="t">Cagnotte</span> {
+    <span class="t">address</span> <span class="k">public</span> owner;                       <span class="c">// qui a créé la cagnotte</span>
+    <span class="t">uint256</span> <span class="k">public constant</span> GOAL = <span class="n">10 ether</span>;     <span class="c">// objectif</span>
+    <span class="t">uint256</span> <span class="k">public</span> total;
+    <span class="t">bool</span>    <span class="k">public</span> closed;
+    <span class="k">mapping</span>(<span class="t">address</span> => <span class="t">uint256</span>) <span class="k">public</span> deposits;
+
+    <span class="k">event</span> <span class="t">Depot</span>(<span class="t">address</span> donateur, <span class="t">uint256</span> montant);
+    <span class="k">event</span> <span class="t">Retrait</span>(<span class="t">address</span> owner, <span class="t">uint256</span> montant);
+
+    <span class="k">constructor</span>() { owner = msg.sender; }
+
+    <span class="k">function</span> <span class="t">deposer</span>() <span class="k">external payable</span> {
+        <span class="k">require</span>(!closed, <span class="s">"Cagnotte cloturee"</span>);
+        <span class="k">require</span>(msg.value > <span class="n">0</span>, <span class="s">"Montant nul"</span>);
+        deposits[msg.sender] += msg.value;
+        total += msg.value;
+        <span class="k">emit</span> Depot(msg.sender, msg.value);
+    }
+
+    <span class="k">function</span> <span class="t">retirer</span>() <span class="k">external</span> {
+        <span class="k">require</span>(msg.sender == owner, <span class="s">"Pas le proprietaire"</span>);
+        <span class="k">require</span>(total >= GOAL, <span class="s">"Objectif non atteint"</span>);
+        <span class="k">require</span>(!closed, <span class="s">"Deja retire"</span>);
+        closed = <span class="n">true</span>;                              <span class="c">// on modifie l'état AVANT d'envoyer</span>
+        (<span class="t">bool</span> ok, ) = owner.call{value: total}(<span class="s">""</span>);
+        <span class="k">require</span>(ok);
+        <span class="k">emit</span> Retrait(owner, total);
+    }
+
+    <span class="k">function</span> <span class="t">rembourser</span>() <span class="k">external</span> {
+        <span class="k">require</span>(!closed, <span class="s">"Cagnotte cloturee"</span>);
+        <span class="t">uint256</span> v = deposits[msg.sender];
+        <span class="k">require</span>(v > <span class="n">0</span>, <span class="s">"Rien a rembourser"</span>);
+        deposits[msg.sender] = <span class="n">0</span>;                   <span class="c">// protège contre la réentrance</span>
+        total -= v;
+        (<span class="t">bool</span> ok, ) = msg.sender.call{value: v}(<span class="s">""</span>);
+        <span class="k">require</span>(ok);
+    }
+}</pre>
+      <ul>
+        <li><code>msg.sender</code> : l'adresse qui appelle la fonction. <code>msg.value</code> : l'ETH envoyé avec l'appel.</li>
+        <li><code>require(condition, "message")</code> : si la condition est fausse, tout est annulé (<strong>revert</strong>).</li>
+        <li><code>event</code> / <code>emit</code> : journaux que les applications peuvent écouter (historique, notifications).</li>
+        <li><code>mapping</code> : un dictionnaire adresse → montant, stocké sur la blockchain.</li>
+      </ul>
+
+      <div class="panel corners demo" id="demo-contract">
+        <div class="demo-title">Démo · Interagis avec la cagnotte (simulation)</div>
+        <div class="contract-ui">
+          <div>
+            <label for="c-who">Appeler en tant que</label>
+            <select class="input" id="c-who">
+              <option>Alice</option><option>Bob</option><option>Carol</option>
+            </select>
+            <label for="c-amount" style="margin-top:12px">Montant (ETH)</label>
+            <input class="input" id="c-amount" type="number" value="3" min="0" step="0.5">
+            <div class="btn-row">
+              <button class="btn small" id="c-deposit">deposer()</button>
+              <button class="btn small magenta" id="c-withdraw">retirer()</button>
+              <button class="btn small lime" id="c-refund">rembourser()</button>
+            </div>
+            <div id="c-state" style="margin-top:16px"></div>
+          </div>
+          <div>
+            <label>Journal des transactions</label>
+            <div class="log" id="c-log"></div>
+          </div>
+        </div>
+        <p class="demo-note">Essaie : Bob tente de retirer (revert), Alice retire avant l'objectif (revert), puis faites atteindre 10 ETH. Note qu'une transaction qui échoue <strong>coûte quand même du gas</strong>.</p>
+      </div>
+
+      <h2 id="cycle">Cycle de vie d'un contrat</h2>
+      <ol>
+        <li><strong>Écrire</strong> le code (Solidity) et le tester localement (Foundry, Hardhat).</li>
+        <li><strong>Compiler</strong> en bytecode EVM + une ABI (la « notice » qui décrit ses fonctions).</li>
+        <li><strong>Déployer</strong> : une transaction spéciale crée le contrat à une nouvelle adresse.</li>
+        <li><strong>Vérifier</strong> le code source sur un explorateur (Etherscan…) pour que chacun puisse le lire.</li>
+        <li><strong>Appeler</strong> : les fonctions de lecture (<code>view</code>) sont gratuites ; celles qui modifient l'état nécessitent une transaction payante.</li>
+      </ol>
+
+      <h2 id="limites">Limites et risques</h2>
+      <ul>
+        <li><strong>Bugs irréversibles</strong> : en 2016, une faille de réentrance dans « The DAO » a permis de siphonner environ 3,6 millions d'ETH, provoquant le hard fork Ethereum / Ethereum Classic.</li>
+        <li><strong>Upgradabilité</strong> : beaucoup de contrats passent par un <em>proxy</em> modifiable par une équipe. Pratique pour corriger, mais cela réintroduit de la confiance.</li>
+        <li><strong>Pas d'accès au monde extérieur</strong> : un contrat ne connaît ni la météo ni le cours de l'euro ; il lui faut un <strong>oracle</strong> (module 12).</li>
+        <li><strong>Coût</strong> : chaque octet stocké et chaque opération se paient en gas.</li>
+      </ul>
+      <div class="callout">
+        <span class="t">Bonnes pratiques</span>
+        <p>Pattern <em>checks-effects-interactions</em> (vérifier, modifier l'état, puis seulement envoyer des fonds), bibliothèques auditées (OpenZeppelin), tests exhaustifs, audits externes et programmes de bug bounty.</p>
+      </div>
+
+      <h2 id="usages">Ce qu'on construit avec</h2>
+      <p>Tokens (module 9), échanges décentralisés et prêts (module 10), DAO (organisations gouvernées par des votes on-chain), NFT, jeux, assurances paramétriques, identité numérique, tokenisation d'actifs réels (obligations, fonds monétaires)…</p>
+
+      <div class="panel quiz" data-quiz>
+        <h2>Quiz</h2>
+        <div class="q" data-answer="2">
+          <p>Que se passe-t-il quand un <code>require</code> échoue ?</p>
+          <div class="opts">
+            <button class="opt">Le contrat est supprimé</button>
+            <button class="opt">Seule la ligne fautive est ignorée</button>
+            <button class="opt">Toute la transaction est annulée (revert), mais le gas consommé est payé</button>
+          </div>
+          <p class="explain">C'est l'atomicité : soit tout réussit, soit rien ne change.</p>
+        </div>
+        <div class="q" data-answer="0">
+          <p>Que représente <code>msg.sender</code> ?</p>
+          <div class="opts">
+            <button class="opt">L'adresse qui appelle la fonction</button>
+            <button class="opt">L'auteur du contrat</button>
+            <button class="opt">Le validateur du bloc</button>
+          </div>
+          <p class="explain">C'est ainsi que le contrat sait qui agit — par exemple pour vérifier que c'est bien le propriétaire.</p>
+        </div>
+        <div class="q" data-answer="1">
+          <p>Pourquoi un smart contract a-t-il besoin d'un oracle pour connaître le prix de l'or ?</p>
+          <div class="opts">
+            <button class="opt">Parce que l'or n'est pas un token</button>
+            <button class="opt">Parce qu'une blockchain ne peut pas accéder seule aux données extérieures</button>
+            <button class="opt">Il n'en a pas besoin</button>
+          </div>
+          <p class="explain">Tous les nœuds doivent obtenir le même résultat : un appel web direct casserait le déterminisme.</p>
+        </div>
+      </div>
+
+    </article>
+  </div>
+</main>
+<script src="../js/sha256.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/demos.js"></script>
+</body>
+</html>

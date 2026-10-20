@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Le consensus : PoW & PoS — Blockverse Academy</title>
+  <meta name="description" content="Proof of Work, Proof of Stake, attaque des 51 %, finalité : comment une blockchain se met d'accord.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-module="04" data-base="../">
+<main>
+  <div class="container article-layout">
+    <article class="article">
+
+      <h2 id="probleme">Se mettre d'accord sans chef</h2>
+      <p>Des milliers de nœuds, qui ne se connaissent pas et dont certains peuvent mentir, doivent s'accorder sur <strong>une seule version</strong> de l'historique. En informatique, c'est le <strong>problème des généraux byzantins</strong> : comment coordonner une armée quand certains messagers sont des traîtres ?</p>
+      <p>La solution des blockchains : rendre le droit d'écrire un bloc <strong>coûteux</strong>, et récompenser les comportements honnêtes. Tricher devient économiquement irrationnel. On appelle ça un <strong>mécanisme de consensus</strong>.</p>
+
+      <h2 id="pow">Proof of Work (preuve de travail)</h2>
+      <p>Utilisée par <strong>Bitcoin</strong> depuis 2009. Les mineurs dépensent de l'électricité pour calculer des hashes (module 3). Le premier qui trouve un hash valide propose le bloc et reçoit :</p>
+      <ul>
+        <li>la <strong>récompense de bloc</strong> (bitcoins nouvellement créés — 3,125 BTC depuis avril 2024) ;</li>
+        <li>les <strong>frais</strong> des transactions incluses.</li>
+      </ul>
+      <p><strong>Règle de la chaîne la plus lourde</strong> : en cas de désaccord, les nœuds suivent la chaîne qui a demandé le plus de travail cumulé.</p>
+      <div class="demo-row">
+        <div class="callout"><span class="t">Avantages</span><p>Très éprouvé, sécurité ancrée dans le monde physique (énergie, matériel), règles simples.</p></div>
+        <div class="callout warn"><span class="t">Inconvénients</span><p>Forte consommation d'énergie, matériel spécialisé (ASIC), concentration dans de grandes « pools » de minage.</p></div>
+      </div>
+
+      <h2 id="pos">Proof of Stake (preuve d'enjeu)</h2>
+      <p>Utilisée par <strong>Ethereum</strong> depuis <em>The Merge</em> (septembre 2022), ainsi que par Solana, Cardano, Avalanche, etc. Au lieu de brûler de l'énergie, les <strong>validateurs</strong> bloquent des cryptos en garantie (le <strong>stake</strong>). Sur Ethereum, il faut 32 ETH pour activer un validateur.</p>
+      <ul>
+        <li>Un validateur est <strong>tiré au sort</strong> pour proposer chaque bloc, avec une probabilité proportionnelle à sa mise.</li>
+        <li>D'autres validateurs <strong>attestent</strong> (votent) que le bloc est valide.</li>
+        <li>Un validateur qui triche (ex. signe deux blocs concurrents) voit une partie de sa mise <strong>détruite</strong> : c'est le <strong>slashing</strong>.</li>
+      </ul>
+
+      <div class="panel corners demo" id="demo-pos">
+        <div class="demo-title">Démo · Tirage au sort pondéré par la mise</div>
+        <div id="pos-sliders" style="display:grid;gap:10px"></div>
+        <div class="btn-row"><button class="btn small" id="pos-run">▶ Simuler 1000 blocs</button></div>
+        <div class="bars" id="pos-bars"></div>
+        <p class="demo-note" id="pos-info">Ajuste les mises puis lance la simulation.</p>
+      </div>
+
+      <div class="callout analogy">
+        <span class="t">Analogie</span>
+        <p>En PoW, on gagne le droit de parler en <strong>courant le plus vite</strong> (dépense d'énergie). En PoS, on le gagne en <strong>déposant une caution</strong> qu'on perd si on ment.</p>
+      </div>
+
+      <h2 id="comparatif">PoW vs PoS</h2>
+      <div class="table-wrap">
+      <table class="data">
+        <tr><th></th><th>Proof of Work</th><th>Proof of Stake</th></tr>
+        <tr><td>Ressource engagée</td><td>Électricité + matériel</td><td>Cryptos bloquées (stake)</td></tr>
+        <tr><td>Qui produit les blocs</td><td>Mineurs</td><td>Validateurs</td></tr>
+        <tr><td>Punition de la triche</td><td>Énergie gaspillée</td><td>Slashing (perte de la mise)</td></tr>
+        <tr><td>Énergie</td><td>Très élevée</td><td>~99,9 % de moins (Ethereum après The Merge)</td></tr>
+        <tr><td>Finalité</td><td>Probabiliste (on attend des confirmations)</td><td>Souvent économique et explicite (Ethereum : ~13 min)</td></tr>
+        <tr><td>Critique principale</td><td>Impact environnemental</td><td>« Les riches deviennent plus riches », complexité</td></tr>
+      </table>
+      </div>
+
+      <h2 id="51">L'attaque des 51 %</h2>
+      <p>Si un acteur contrôle plus de la moitié de la puissance de minage (ou du stake), il peut <strong>réécrire les blocs récents</strong> : annuler ses propres paiements (double dépense) ou censurer des transactions. Il ne peut <strong>pas</strong> voler les fonds d'autrui (il lui faudrait leurs clés privées) ni créer des coins hors des règles.</p>
+      <p>Sur Bitcoin ou Ethereum, une telle attaque coûterait des milliards et détruirait la valeur de ce que l'attaquant possède. Mais des chaînes plus petites (Ethereum Classic, Bitcoin Gold…) en ont été victimes.</p>
+
+      <h2 id="autres">Les autres familles de consensus</h2>
+      <ul>
+        <li><strong>Delegated PoS (DPoS)</strong> : les détenteurs élisent un petit nombre de producteurs de blocs (EOS, Tron). Rapide mais plus centralisé.</li>
+        <li><strong>BFT (Tendermint/CometBFT)</strong> : un ensemble de validateurs vote en plusieurs tours ; finalité immédiate (écosystème Cosmos).</li>
+        <li><strong>Proof of History</strong> : Solana l'utilise comme horloge cryptographique en complément de son PoS.</li>
+        <li><strong>Proof of Authority</strong> : des validateurs identifiés et approuvés (réseaux de test, blockchains d'entreprise).</li>
+      </ul>
+
+      <h2 id="finalite">La finalité, notion clé</h2>
+      <p>La <strong>finalité</strong> est le moment où une transaction ne peut plus être annulée. En PoW, elle est <em>probabiliste</em> : plus il y a de blocs par-dessus, plus l'annulation devient improbable. Sur Ethereum, un bloc est <em>finalisé</em> quand deux tiers des validateurs l'ont validé sur deux « epochs » (~12,8 minutes) : l'annuler obligerait à détruire au moins un tiers de tout l'ETH staké.</p>
+
+      <div class="panel quiz" data-quiz>
+        <h2>Quiz</h2>
+        <div class="q" data-answer="1">
+          <p>Depuis quand Ethereum utilise-t-il le Proof of Stake ?</p>
+          <div class="opts">
+            <button class="opt">Depuis son lancement en 2015</button>
+            <button class="opt">Depuis The Merge, en septembre 2022</button>
+            <button class="opt">Il utilise toujours le Proof of Work</button>
+          </div>
+          <p class="explain">The Merge a fusionné la Beacon Chain (PoS) avec le réseau principal, réduisant sa consommation énergétique d'environ 99,9 %.</p>
+        </div>
+        <div class="q" data-answer="2">
+          <p>Qu'est-ce que le slashing ?</p>
+          <div class="opts">
+            <button class="opt">La division d'un bloc en deux</button>
+            <button class="opt">La baisse de la récompense de minage</button>
+            <button class="opt">La destruction d'une partie de la mise d'un validateur malhonnête</button>
+          </div>
+          <p class="explain">C'est ce qui rend la triche coûteuse en Proof of Stake.</p>
+        </div>
+        <div class="q" data-answer="0">
+          <p>Un attaquant à 51 % peut…</p>
+          <div class="opts">
+            <button class="opt">réorganiser les blocs récents pour faire une double dépense</button>
+            <button class="opt">voler les bitcoins de n'importe quel wallet</button>
+            <button class="opt">créer autant de bitcoins qu'il veut</button>
+          </div>
+          <p class="explain">Les signatures protègent toujours les fonds des autres, et les nœuds rejettent les blocs qui violent les règles d'émission.</p>
+        </div>
+      </div>
+
+    </article>
+  </div>
+</main>
+<script src="../js/sha256.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/demos.js"></script>
+</body>
+</html>

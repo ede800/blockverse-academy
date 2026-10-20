@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blockverse Academy — Apprendre la crypto et la blockchain</title>
+  <meta name="description" content="Parcours gratuit et interactif pour s'initier aux cryptomonnaies : blockchain, hachage, consensus, wallets, Bitcoin, Ethereum, smart contracts, DeFi, layers L1/L2/L3.">
+  <meta property="og:title" content="Blockverse Academy">
+  <meta property="og:description" content="Des bases de la blockchain aux rollups : un parcours interactif pour comprendre la crypto.">
+  <meta name="theme-color" content="#04050d">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="home" data-base="">
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <span class="kicker">Protocole d'apprentissage · v1.0</span>
+        <h1>
+          <span class="gradient-text glitch" data-text="Décode">Décode</span><br>
+          la blockchain.
+        </h1>
+        <p class="lead">
+          Un parcours interactif et gratuit pour comprendre les cryptomonnaies — du simple
+          <em>« c'est quoi un bloc ? »</em> jusqu'aux smart contracts, à la DeFi et aux rollups de layer 2.
+          Pas de jargon gratuit, pas de promesse de gains : juste la mécanique, expliquée et manipulable.
+        </p>
+        <div class="hero-cta">
+          <a class="btn primary" href="modules/01-pourquoi-la-crypto.html">▶ Commencer le parcours</a>
+          <a class="btn magenta" href="#parcours">Voir les 13 modules</a>
+        </div>
+        <div class="hero-stats">
+          <div><b>13</b>modules</div>
+          <div><b>3</b>niveaux</div>
+          <div><b>10+</b>démos interactives</div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="cube-wrap">
+          <div class="orbit"></div>
+          <div class="orbit o2"></div>
+          <div class="cube">
+            <div class="face f1" data-hash></div>
+            <div class="face f2" data-hash></div>
+            <div class="face f3" data-hash></div>
+            <div class="face f4" data-hash></div>
+            <div class="face f5"></div>
+            <div class="face f6"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- POURQUOI -->
+  <section class="section">
+    <div class="container">
+      <span class="kicker">Méthode</span>
+      <h2 class="section-title">Apprendre en <span class="gradient-text">manipulant</span></h2>
+      <p class="lead">Chaque concept est accompagné d'une analogie, d'un schéma ou d'une simulation que tu peux casser toi-même.</p>
+      <div class="features">
+        <div class="panel corners feature reveal"><div class="ico">⛏</div><h4>Mine un bloc</h4><p>Modifie une transaction, regarde la chaîne se briser, puis remine-la avec le vrai algorithme SHA-256.</p></div>
+        <div class="panel corners feature reveal"><div class="ico">⌬</div><h4>Appelle un contrat</h4><p>Interagis avec un smart contract simulé : dépôts, retraits, reverts et gas consommé.</p></div>
+        <div class="panel corners feature reveal"><div class="ico">⇄</div><h4>Swap sur un AMM</h4><p>Échange des tokens dans une pool x·y=k et observe l'impact de prix en temps réel.</p></div>
+        <div class="panel corners feature reveal"><div class="ico">≡</div><h4>Empile les layers</h4><p>Comprends L0, L1, L2, L3 et calcule combien un rollup fait économiser.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PARCOURS -->
+  <section class="section" id="parcours">
+    <div class="container">
+      <span class="kicker">Parcours</span>
+      <h2 class="section-title">Trois niveaux, <span class="gradient-text">treize modules</span></h2>
+      <p class="lead">Suis-les dans l'ordre : chaque module s'appuie sur le précédent. Ta progression est enregistrée dans ton navigateur.</p>
+      <div class="panel" style="padding:16px 20px;margin-top:24px;max-width:520px">
+        <div class="stat" style="display:flex;justify-content:space-between"><span>PROGRESSION</span><b data-progress-text></b></div>
+        <div class="bar-track" style="margin-top:8px"><div class="bar-fill l" data-progress-bar></div></div>
+      </div>
+      <div class="levels" id="levels"></div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section">
+    <div class="container">
+      <div class="panel corners reveal" style="padding:40px;text-align:center">
+        <span class="kicker">Besoin d'une définition ?</span>
+        <h2 class="section-title" style="margin-top:12px">Le <span class="gradient-text">lexique</span> crypto</h2>
+        <p class="lead" style="margin:0 auto 24px">Gas, nonce, rollup, slippage, seed phrase… plus de 60 termes expliqués simplement.</p>
+        <a class="btn" href="lexique.html">Ouvrir le lexique</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="js/sha256.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

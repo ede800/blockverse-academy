@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Les layers : L0, L1, L2, L3 — Blockverse Academy</title>
+  <meta name="description" content="Trilemme de la blockchain, layer 0, layer 1, layer 2, layer 3, rollups optimistes et ZK, disponibilité des données.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-module="11" data-base="../">
+<main>
+  <div class="container article-layout">
+    <article class="article">
+
+      <h2 id="trilemme">Le trilemme de la blockchain</h2>
+      <p>Vitalik Buterin a formulé un constat : il est très difficile pour une blockchain d'être à la fois</p>
+      <div class="key-points">
+        <div class="kp"><b>Décentralisée</b><span>N'importe qui peut faire tourner un nœud avec un ordinateur ordinaire.</span></div>
+        <div class="kp"><b>Sécurisée</b><span>Attaquer le réseau coûte extrêmement cher.</span></div>
+        <div class="kp"><b>Scalable</b><span>Elle traite des milliers de transactions par seconde, à bas coût.</span></div>
+      </div>
+      <p>Augmenter la taille ou la fréquence des blocs améliore le débit, mais alourdit les nœuds : moins de gens peuvent en faire tourner, donc moins de décentralisation. Bitcoin (~7 tx/s) et Ethereum L1 (~15 à 30 tx/s) privilégient la décentralisation et la sécurité. La réponse moderne au trilemme : <strong>séparer les rôles en plusieurs couches</strong>.</p>
+
+      <h2 id="pile">La pile des layers</h2>
+      <p>Clique sur chaque couche pour l'explorer :</p>
+      <div id="demo-layers">
+        <div class="stack">
+          <button class="layer" data-l="3"><span class="ln">L3</span><span class="lt"><b>Couches applicatives</b><span>Chaînes spécialisées construites au-dessus d'un L2</span></span></button>
+          <button class="layer" data-l="2"><span class="ln">L2</span><span class="lt"><b>Couches d'exécution / scaling</b><span>Rollups, canaux de paiement : exécuter vite et pas cher</span></span></button>
+          <button class="layer" data-l="1"><span class="ln">L1</span><span class="lt"><b>Blockchains de base</b><span>Règlement, consensus, sécurité finale</span></span></button>
+          <button class="layer" data-l="0"><span class="ln">L0</span><span class="lt"><b>Infrastructure & interopérabilité</b><span>Réseau, protocoles qui relient ou lancent des L1</span></span></button>
+        </div>
+        <div class="panel layer-detail"></div>
+      </div>
+
+      <template id="layer-0">
+        <h4 style="color:var(--cyan)">Layer 0 — les fondations</h4>
+        <p>Le terme désigne deux choses : l'<strong>infrastructure réseau</strong> elle-même (internet, protocoles de communication entre nœuds) et surtout des <strong>protocoles qui servent à créer et relier plusieurs blockchains</strong> entre elles.</p>
+        <ul>
+          <li><strong>Polkadot</strong> : une « relay chain » qui fournit la sécurité partagée à des chaînes spécialisées (parachains).</li>
+          <li><strong>Cosmos</strong> : un kit (Cosmos SDK + CometBFT) pour créer des chaînes souveraines, reliées par le protocole IBC.</li>
+          <li><strong>Avalanche</strong> : réseau de chaînes personnalisables.</li>
+        </ul>
+        <p class="demo-note">Rôle : interopérabilité, création de blockchains sur mesure.</p>
+      </template>
+      <template id="layer-1">
+        <h4 style="color:var(--violet)">Layer 1 — la source de vérité</h4>
+        <p>La blockchain principale, avec son propre consensus et sa monnaie native. Elle assure le <strong>règlement final</strong> : ce qui y est inscrit fait foi.</p>
+        <ul>
+          <li><strong>Bitcoin</strong> : monnaie, sécurité maximale, fonctionnalités minimales.</li>
+          <li><strong>Ethereum</strong> : smart contracts, et désormais couche de règlement pour les rollups.</li>
+          <li><strong>Solana, Sui, Aptos</strong> : L1 « monolithiques » qui cherchent à tout faire vite sur une seule couche.</li>
+        </ul>
+        <p class="demo-note">Rôle : consensus, sécurité, disponibilité des données, règlement.</p>
+      </template>
+      <template id="layer-2">
+        <h4 style="color:var(--magenta)">Layer 2 — le scaling</h4>
+        <p>Un réseau qui <strong>exécute les transactions hors du L1</strong>, puis y publie un résumé (et des preuves), afin d'<strong>hériter de sa sécurité</strong>. C'est la différence avec une simple sidechain, qui a sa propre sécurité.</p>
+        <ul>
+          <li><strong>Rollups optimistes</strong> : Arbitrum, Optimism, Base…</li>
+          <li><strong>ZK-rollups</strong> : zkSync, Starknet, Scroll, Linea…</li>
+          <li><strong>Canaux de paiement</strong> : Lightning Network sur Bitcoin.</li>
+        </ul>
+        <p class="demo-note">Rôle : exécution rapide et bon marché, sécurisée par le L1.</p>
+      </template>
+      <template id="layer-3">
+        <h4 style="color:var(--lime)">Layer 3 — l'hyper-spécialisation</h4>
+        <p>Des chaînes construites <strong>au-dessus d'un L2</strong>, comme le L2 est construit au-dessus du L1. Elles servent à une application précise : un jeu, un réseau social, une chaîne d'entreprise, avec des réglages sur mesure (token de gas personnalisé, confidentialité…).</p>
+        <ul>
+          <li>Arbitrum Orbit, ZK Stack (hyperchains), OP Stack…</li>
+        </ul>
+        <p class="demo-note">Rôle : personnalisation et coûts encore plus bas, au prix d'une sécurité plus indirecte.</p>
+      </template>
+
+      <h2 id="rollups">Comment fonctionne un rollup</h2>
+      <ol>
+        <li>Les utilisateurs envoient leurs transactions au <strong>séquenceur</strong> du rollup, qui les ordonne et les exécute instantanément.</li>
+        <li>Le séquenceur regroupe des centaines de transactions en un <strong>lot</strong> (batch), les compresse…</li>
+        <li>… et publie ces données sur le L1 (dans des <em>blobs</em> sur Ethereum depuis EIP-4844) avec le nouvel état.</li>
+        <li>Le L1 garantit que les données sont disponibles et que l'état est correct (par fraude ou par preuve, voir ci-dessous).</li>
+      </ol>
+      <p>Le coût de publication d'un lot sur le L1 est <strong>partagé</strong> entre toutes les transactions qu'il contient : c'est là que vient l'économie.</p>
+
+      <div class="panel corners demo" id="demo-rollup">
+        <div class="demo-title">Démo · L'économie d'un rollup</div>
+        <div class="demo-row">
+          <div>
+            <label for="ru-n">Transactions par lot : <b id="ru-nv"></b></label>
+            <input type="range" id="ru-n" min="1" max="2000" value="500">
+          </div>
+          <div>
+            <label for="ru-l1">Coût d'une transaction sur le L1 ($)</label>
+            <input class="input" id="ru-l1" type="number" value="2" min="0.01" step="0.1">
+          </div>
+        </div>
+        <div class="bars" id="ru-bars"></div>
+        <p class="demo-note" id="ru-out"></p>
+      </div>
+
+      <h2 id="optimistic-zk">Optimistic vs ZK : deux façons de prouver</h2>
+      <div class="demo-row">
+        <div class="panel" style="padding:20px">
+          <h3 style="margin-top:0;color:var(--magenta)">Optimistic rollups</h3>
+          <p><strong>« Innocent jusqu'à preuve du contraire. »</strong> Le séquenceur publie le nouvel état sans preuve. Pendant une <strong>période de contestation</strong> (~7 jours), n'importe qui peut soumettre une <strong>preuve de fraude</strong>. Si elle est valide, l'état est annulé et le tricheur perd sa caution.</p>
+          <p class="demo-note">✔ Compatible EVM facilement, mature.<br>✖ Retraits vers le L1 lents (~7 jours) sans service de bridge rapide.</p>
+        </div>
+        <div class="panel" style="padding:20px">
+          <h3 style="margin-top:0;color:var(--cyan)">ZK-rollups</h3>
+          <p><strong>« Prouvé mathématiquement à chaque lot. »</strong> Chaque lot est accompagné d'une <strong>preuve à divulgation nulle de connaissance</strong> (SNARK/STARK) que le L1 vérifie en quelques millisecondes. Un état faux est tout simplement impossible à faire accepter.</p>
+          <p class="demo-note">✔ Finalité rapide, retraits en quelques heures.<br>✖ Génération de preuves coûteuse en calcul, technologie plus complexe.</p>
+        </div>
+      </div>
+      <div class="callout analogy">
+        <span class="t">Analogie : les preuves ZK</span>
+        <p>Imagine prouver à quelqu'un que tu as trouvé Charlie dans une page de « Où est Charlie ? » sans lui montrer où : tu poses un grand carton percé d'un petit trou par-dessus la page, et seul Charlie apparaît. Il est convaincu, sans rien apprendre de sa position. Une preuve ZK convainc qu'un calcul est correct sans le refaire.</p>
+      </div>
+
+      <h2 id="da">La disponibilité des données (DA)</h2>
+      <p>Pour qu'un rollup soit sûr, ses données de transactions doivent être <strong>publiquement disponibles</strong> : sinon, personne ne pourrait reconstruire l'état ou prouver une fraude. D'où l'importance de la couche « Data Availability » :</p>
+      <ul>
+        <li><strong>Rollup</strong> : données publiées sur le L1 (sécurité maximale).</li>
+        <li><strong>Validium</strong> : données gardées hors chaîne par un comité (moins cher, moins sûr).</li>
+        <li><strong>Couches DA dédiées</strong> : Celestia, EigenDA, Avail — c'est l'approche <strong>modulaire</strong>, où exécution, règlement, consensus et DA sont assurés par des couches différentes.</li>
+      </ul>
+
+      <h2 id="limites">Les limites actuelles des L2</h2>
+      <ul>
+        <li><strong>Séquenceurs centralisés</strong> : la plupart des rollups ont encore un seul séquenceur opéré par l'équipe, qui pourrait censurer temporairement ou tomber en panne.</li>
+        <li><strong>Roues de secours</strong> : la maturité d'un L2 se mesure par « stages » (0, 1, 2) selon sa capacité à fonctionner sans contrôle de l'équipe — consultable sur des sites comme L2BEAT.</li>
+        <li><strong>Fragmentation</strong> : la liquidité et les utilisateurs sont dispersés entre des dizaines de L2, d'où les efforts d'interopérabilité (module 12).</li>
+      </ul>
+      <div class="table-wrap">
+      <table class="data">
+        <tr><th></th><th>L1 monolithique</th><th>Sidechain</th><th>Rollup (L2)</th></tr>
+        <tr><td>Sécurité</td><td>Propre</td><td>Propre (souvent plus faible)</td><td>Héritée du L1</td></tr>
+        <tr><td>Données publiées sur le L1</td><td>—</td><td>Non</td><td>Oui</td></tr>
+        <tr><td>Exemples</td><td>Solana</td><td>Polygon PoS (historiquement)</td><td>Arbitrum, Base, zkSync</td></tr>
+      </table>
+      </div>
+
+      <div class="panel quiz" data-quiz>
+        <h2>Quiz</h2>
+        <div class="q" data-answer="2">
+          <p>Quels sont les trois éléments du trilemme de la blockchain ?</p>
+          <div class="opts">
+            <button class="opt">Prix, vitesse, popularité</button>
+            <button class="opt">Minage, staking, trading</button>
+            <button class="opt">Décentralisation, sécurité, scalabilité</button>
+          </div>
+          <p class="explain">Les architectures en couches cherchent à obtenir les trois en répartissant les rôles.</p>
+        </div>
+        <div class="q" data-answer="0">
+          <p>Qu'est-ce qui distingue un rollup d'une sidechain ?</p>
+          <div class="opts">
+            <button class="opt">Le rollup publie ses données sur le L1 et hérite de sa sécurité</button>
+            <button class="opt">La sidechain est toujours plus rapide</button>
+            <button class="opt">Il n'y a aucune différence</button>
+          </div>
+          <p class="explain">Une sidechain a ses propres validateurs ; si elle est compromise, le L1 ne peut rien y faire.</p>
+        </div>
+        <div class="q" data-answer="1">
+          <p>Pourquoi les retraits d'un optimistic rollup vers Ethereum prennent-ils ~7 jours ?</p>
+          <div class="opts">
+            <button class="opt">À cause de la congestion d'Ethereum</button>
+            <button class="opt">C'est la période pendant laquelle on peut contester l'état avec une preuve de fraude</button>
+            <button class="opt">Pour calculer une preuve ZK</button>
+          </div>
+          <p class="explain">Les ZK-rollups n'ont pas ce délai, car chaque lot est prouvé valide dès sa publication.</p>
+        </div>
+        <div class="q" data-answer="1">
+          <p>Polkadot et Cosmos sont plutôt considérés comme…</p>
+          <div class="opts">
+            <button class="opt">des layer 2</button>
+            <button class="opt">des layer 0, qui permettent de créer et relier des blockchains</button>
+            <button class="opt">des layer 3</button>
+          </div>
+          <p class="explain">Ils fournissent l'infrastructure pour lancer des chaînes et les faire communiquer.</p>
+        </div>
+      </div>
+
+    </article>
+  </div>
+</main>
+<script src="../js/sha256.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/demos.js"></script>
+</body>
+</html>

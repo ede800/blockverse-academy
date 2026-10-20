@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wallets, clés & adresses — Blockverse Academy</title>
+  <meta name="description" content="Clé privée, clé publique, adresse, seed phrase, hot et cold wallet : comprendre la détention de cryptos.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-module="05" data-base="../">
+<main>
+  <div class="container article-layout">
+    <article class="article">
+
+      <h2 id="mythe">Un wallet ne contient pas de cryptos</h2>
+      <p>C'est la confusion n°1. Tes cryptos ne sont pas « dans » ton wallet : elles sont inscrites <strong>sur la blockchain</strong>, associées à une adresse. Le wallet ne stocke que les <strong>clés</strong> qui permettent de les dépenser.</p>
+      <div class="callout analogy">
+        <span class="t">Analogie</span>
+        <p>La blockchain est une rangée de boîtes aux lettres en verre. Tout le monde voit ce qu'il y a dedans et peut y déposer quelque chose grâce à l'<strong>adresse</strong>. Seul le détenteur de la <strong>clé privée</strong> peut ouvrir la sienne. Le wallet, c'est ton trousseau de clés.</p>
+      </div>
+
+      <h2 id="chaine">De la seed phrase à l'adresse</h2>
+      <pre class="code"><span class="t">Seed phrase</span> (12 ou 24 mots, BIP-39)
+     │  dérivation (BIP-32/44) : une infinité de clés
+     ▼
+<span class="k">Clé privée</span>   256 bits secrets           <span class="c">→ signe les transactions</span>
+     │  multiplication sur courbe elliptique (sens unique)
+     ▼
+<span class="s">Clé publique</span>                           <span class="c">→ vérifie les signatures</span>
+     │  hachage (SHA-256 + RIPEMD-160 pour Bitcoin, Keccak-256 pour Ethereum)
+     ▼
+<span class="n">Adresse</span>      bc1q… / 0x…              <span class="c">→ à partager pour recevoir</span></pre>
+
+      <div class="panel corners demo" id="demo-keys">
+        <div class="demo-title">Démo · Générateur de trousseau (simulation)</div>
+        <label>Seed phrase</label><div class="hash-out" id="k-seed" style="color:var(--lime)"></div>
+        <label style="margin-top:12px">Clé privée</label><div class="hash-out" id="k-priv" style="color:var(--magenta)"></div>
+        <label style="margin-top:12px">Clé publique</label><div class="hash-out" id="k-pub"></div>
+        <label style="margin-top:12px">Adresse</label><div class="hash-out" id="k-addr" style="color:var(--amber)"></div>
+        <div class="btn-row"><button class="btn small" id="k-gen">↻ Générer un nouveau trousseau</button></div>
+        <p class="demo-note">⚠ Démo purement pédagogique : la liste de mots et la dérivation sont simplifiées (les vrais wallets utilisent la liste BIP-39 de 2048 mots et la courbe secp256k1). <strong>N'utilise jamais ces clés pour de vrais fonds.</strong></p>
+      </div>
+
+      <h2 id="seed">La seed phrase : ta sauvegarde absolue</h2>
+      <p>La <strong>phrase de récupération</strong> (seed phrase, mnemonic) encode toutes tes clés. Avec ces 12 ou 24 mots, n'importe qui peut restaurer ton wallet sur n'importe quel appareil… et vider tes fonds.</p>
+      <div class="callout danger">
+        <span class="t">Règles d'or</span>
+        <p>
+          ① Écris-la sur papier ou métal, jamais en photo, dans un mail, un cloud ou un gestionnaire de notes.<br>
+          ② <strong>Personne</strong> de légitime ne te la demandera jamais : ni un support, ni un exchange, ni un « airdrop ».<br>
+          ③ Garde plusieurs copies dans des lieux sûrs différents.<br>
+          ④ Perdue = fonds perdus pour toujours. Aucun service client ne peut la récupérer.
+        </p>
+      </div>
+
+      <h2 id="types">Les types de wallets</h2>
+      <div class="table-wrap">
+      <table class="data">
+        <tr><th>Type</th><th>Exemples</th><th>Pour</th><th>Contre</th></tr>
+        <tr><td><strong>Custodial</strong> (exchange)</td><td>Compte sur une plateforme d'échange</td><td>Simple, récupération de mot de passe possible</td><td>« Not your keys, not your coins » : la plateforme détient tes clés (cf. faillite de FTX en 2022)</td></tr>
+        <tr><td><strong>Hot wallet</strong></td><td>Extension de navigateur, appli mobile</td><td>Gratuit, pratique pour la DeFi</td><td>Clés sur un appareil connecté, exposé aux malwares</td></tr>
+        <tr><td><strong>Cold / hardware wallet</strong></td><td>Clé USB dédiée</td><td>Les clés ne quittent jamais l'appareil</td><td>Payant, moins pratique au quotidien</td></tr>
+        <tr><td><strong>Multisig</strong></td><td>2 signatures sur 3 nécessaires</td><td>Pas de point de défaillance unique</td><td>Plus complexe à configurer</td></tr>
+        <tr><td><strong>Smart wallet</strong> (account abstraction)</td><td>Wallets basés sur un contrat (ERC-4337)</td><td>Récupération sociale, paiement du gas en stablecoins, passkeys</td><td>Plus récent, dépend de la sécurité du contrat</td></tr>
+      </table>
+      </div>
+
+      <h2 id="adresses">Lire une adresse</h2>
+      <ul>
+        <li><strong>Bitcoin</strong> : <code>1…</code> (ancien format), <code>3…</code> (P2SH), <code>bc1q…</code> (SegWit), <code>bc1p…</code> (Taproot).</li>
+        <li><strong>Ethereum et chaînes compatibles EVM</strong> : <code>0x</code> + 40 caractères hexadécimaux. La même adresse fonctionne sur Ethereum, Arbitrum, Base, Polygon… mais les fonds sont distincts sur chaque chaîne !</li>
+        <li><strong>Noms lisibles</strong> : des services comme ENS associent un nom (<code>alice.eth</code>) à une adresse.</li>
+      </ul>
+      <div class="callout warn">
+        <span class="t">Attention</span>
+        <p>Vérifie toujours le <strong>réseau</strong> et l'<strong>adresse complète</strong> avant d'envoyer. Les malwares « clipper » remplacent l'adresse copiée dans le presse-papiers, et l'« address poisoning » glisse dans ton historique une adresse qui ressemble à la vraie (mêmes premiers et derniers caractères).</p>
+      </div>
+
+      <h2 id="pseudonymat">Pseudonyme, pas anonyme</h2>
+      <p>Une adresse ne porte pas ton nom, mais toutes ses transactions sont publiques et permanentes. Dès qu'elle est liée à ton identité (achat sur une plateforme avec KYC, paiement à un commerçant), tout ton historique peut être retracé. Des sociétés d'analyse on-chain se sont spécialisées là-dedans.</p>
+
+      <div class="panel quiz" data-quiz>
+        <h2>Quiz</h2>
+        <div class="q" data-answer="0">
+          <p>Où sont réellement stockées tes cryptos ?</p>
+          <div class="opts">
+            <button class="opt">Sur la blockchain, associées à ton adresse</button>
+            <button class="opt">Dans le fichier de ton wallet</button>
+            <button class="opt">Sur les serveurs de l'éditeur du wallet</button>
+          </div>
+          <p class="explain">Le wallet ne garde que les clés. C'est pourquoi on peut restaurer ses fonds sur un autre appareil avec la seed phrase.</p>
+        </div>
+        <div class="q" data-answer="2">
+          <p>Un « support technique » te demande ta seed phrase pour débloquer ton compte. Tu…</p>
+          <div class="opts">
+            <button class="opt">la donnes, c'est le support officiel</button>
+            <button class="opt">donnes seulement les 6 premiers mots</button>
+            <button class="opt">refuses : c'est une arnaque, à 100 %</button>
+          </div>
+          <p class="explain">Aucun service légitime ne demande jamais une seed phrase. Même une partie réduit énormément la sécurité.</p>
+        </div>
+        <div class="q" data-answer="1">
+          <p>Quel est l'avantage principal d'un hardware wallet ?</p>
+          <div class="opts">
+            <button class="opt">Les transactions sont gratuites</button>
+            <button class="opt">La clé privée ne quitte jamais l'appareil, même pour signer</button>
+            <button class="opt">On n'a plus besoin de seed phrase</button>
+          </div>
+          <p class="explain">L'ordinateur envoie la transaction à signer, l'appareil renvoie uniquement la signature.</p>
+        </div>
+      </div>
+
+    </article>
+  </div>
+</main>
+<script src="../js/sha256.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/demos.js"></script>
+</body>
+</html>

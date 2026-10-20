@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bridges, oracles & interopérabilité — Blockverse Academy</title>
+  <meta name="description" content="Bridges lock & mint, messagerie cross-chain, oracles et problème de l'oracle : relier les blockchains entre elles et au monde réel.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-module="12" data-base="../">
+<main>
+  <div class="container article-layout">
+    <article class="article">
+
+      <h2 id="iles">Des îles qui ne se parlent pas</h2>
+      <p>Chaque blockchain est un système fermé : Bitcoin ne sait rien de ce qui se passe sur Ethereum, et Ethereum ne sait rien du monde extérieur. Or les utilisateurs veulent déplacer leurs actifs entre chaînes et les smart contracts ont besoin de données réelles (prix, résultats sportifs, météo…). Deux familles d'outils répondent à ce besoin : les <strong>bridges</strong> et les <strong>oracles</strong>.</p>
+
+      <h2 id="bridges">Les bridges : passer d'une chaîne à l'autre</h2>
+      <p>Un token ne peut pas réellement « voyager » d'une blockchain à une autre. Le mécanisme le plus courant est le <strong>lock & mint</strong> :</p>
+      <ol>
+        <li>Tu déposes 1 ETH dans un contrat-coffre du bridge sur la chaîne A, où il est <strong>verrouillé</strong>.</li>
+        <li>Le bridge constate le dépôt et <strong>crée</strong> (mint) 1 token « wrapped » équivalent sur la chaîne B.</li>
+        <li>Pour revenir, tu <strong>brûles</strong> le token wrapped sur B, et le coffre te rend l'ETH sur A.</li>
+      </ol>
+
+      <div class="panel corners demo" id="demo-bridge">
+        <div class="demo-title">Démo · Bridge lock & mint</div>
+        <div id="br-view"></div>
+        <div class="btn-row">
+          <button class="btn small" id="br-lock">🔒 Bridger 1 ETH vers B</button>
+          <button class="btn small lime" id="br-burn">🔥 Revenir vers A</button>
+          <button class="btn small magenta" id="br-hack">💀 Simuler un hack du coffre</button>
+        </div>
+        <p class="demo-note" id="br-info">Bridge quelques ETH, puis simule un hack pour comprendre pourquoi les bridges sont des cibles de choix.</p>
+      </div>
+
+      <h3>Autres modèles</h3>
+      <ul>
+        <li><strong>Burn & mint natif</strong> : l'émetteur du token le brûle sur une chaîne et le recrée sur l'autre (ex. le protocole CCTP de Circle pour USDC). Pas de coffre à pirater, mais il faut faire confiance à l'émetteur.</li>
+        <li><strong>Pools de liquidité</strong> : le bridge possède des réserves sur chaque chaîne et te paie sur la chaîne d'arrivée (rapide, mais limité par la liquidité).</li>
+        <li><strong>Intents</strong> : tu exprimes ton souhait (« je veux 1 ETH sur Base ») et des « solveurs » se font concurrence pour te le livrer rapidement, puis se font rembourser.</li>
+      </ul>
+
+      <h2 id="confiance">Qui vérifie ? Le vrai sujet des bridges</h2>
+      <p>La question décisive : <strong>comment la chaîne B sait-elle que le dépôt a bien eu lieu sur A ?</strong></p>
+      <div class="table-wrap">
+      <table class="data">
+        <tr><th>Modèle de vérification</th><th>Principe</th><th>Niveau de confiance</th></tr>
+        <tr><td>Multisig / comité</td><td>Un petit groupe signe pour attester des dépôts</td><td>Faible : il suffit de compromettre quelques clés</td></tr>
+        <tr><td>Réseau d'oracles / validateurs</td><td>Un réseau plus large atteste, avec incitations économiques</td><td>Moyen</td></tr>
+        <tr><td>Optimiste</td><td>Les messages sont acceptés sauf contestation pendant un délai</td><td>Bon, s'il existe au moins un surveillant honnête</td></tr>
+        <tr><td>Light client / preuve ZK</td><td>La chaîne B vérifie cryptographiquement le consensus de A</td><td>Le plus élevé, « trust-minimized »</td></tr>
+      </table>
+      </div>
+      <div class="callout danger">
+        <span class="t">Historique</span>
+        <p>Les bridges figurent parmi les plus gros piratages de l'histoire crypto : <strong>Ronin</strong> (~620 M$, 2022, 5 clés sur 9 compromises), <strong>Wormhole</strong> (~320 M$, 2022, faille de vérification de signature), <strong>Nomad</strong> (~190 M$, 2022, bug d'initialisation). Un coffre qui contient des centaines de millions est une cible évidente.</p>
+      </div>
+
+      <h2 id="messagerie">La messagerie cross-chain</h2>
+      <p>Au-delà des tokens, on peut transmettre des <strong>messages arbitraires</strong> d'une chaîne à l'autre : voter sur une chaîne et exécuter le résultat sur une autre, gérer une position DeFi multi-chaînes… Exemples : <strong>IBC</strong> dans l'écosystème Cosmos (basé sur des light clients), LayerZero, Chainlink CCIP, Wormhole, Hyperlane. Côté Ethereum, les L2 travaillent à une interopérabilité native entre rollups pour réduire la fragmentation.</p>
+
+      <h2 id="oracles">Les oracles : brancher la blockchain sur le monde</h2>
+      <p>Un smart contract ne peut pas faire de requête web : tous les nœuds doivent obtenir exactement le même résultat, or une page web peut changer d'une seconde à l'autre. Un <strong>oracle</strong> est un service qui écrit des données externes sur la blockchain pour que les contrats puissent les lire.</p>
+      <ul>
+        <li><strong>Prix</strong> : indispensables aux protocoles de prêt (liquidations) et aux dérivés.</li>
+        <li><strong>Aléatoire vérifiable</strong> (VRF) : tirages au sort équitables pour des jeux ou des NFT.</li>
+        <li><strong>Événements réels</strong> : résultats d'élections ou de matchs (marchés de prédiction), météo (assurance paramétrique).</li>
+        <li><strong>Preuves de réserves</strong> : vérifier qu'un stablecoin ou un token wrapped est bien couvert.</li>
+      </ul>
+
+      <h2 id="probleme-oracle">Le « problème de l'oracle »</h2>
+      <p>Une blockchain peut être parfaitement décentralisée, si son oracle est une source unique, <strong>tout le système dépend de cette source</strong>. Les bonnes pratiques :</p>
+      <ul>
+        <li>Agréger plusieurs sources et plusieurs opérateurs indépendants (Chainlink, Pyth, Redstone…).</li>
+        <li>Utiliser des moyennes pondérées dans le temps (TWAP) plutôt qu'un prix instantané.</li>
+        <li>Ne jamais utiliser comme oracle le prix spot d'une petite pool de DEX : un attaquant avec un flash loan peut le manipuler le temps d'une transaction.</li>
+      </ul>
+      <div class="callout">
+        <span class="t">Exemple d'attaque</span>
+        <p>① Emprunter 50 M$ en flash loan. ② Les utiliser pour faire monter artificiellement le prix d'un token dans une pool peu liquide. ③ Un protocole de prêt qui lit ce prix accepte ce token surévalué comme garantie. ④ Emprunter le maximum, rembourser le flash loan, et partir avec la différence. Tout ça en une seule transaction.</p>
+      </div>
+
+      <div class="panel quiz" data-quiz>
+        <h2>Quiz</h2>
+        <div class="q" data-answer="0">
+          <p>Dans un bridge lock & mint, que représente le token « wrapped » sur la chaîne d'arrivée ?</p>
+          <div class="opts">
+            <button class="opt">Une créance sur l'actif verrouillé dans le coffre du bridge</button>
+            <button class="opt">L'actif original, déplacé physiquement</button>
+            <button class="opt">Un nouvel actif sans lien avec l'original</button>
+          </div>
+          <p class="explain">Si le coffre est vidé, le token wrapped perd sa garantie.</p>
+        </div>
+        <div class="q" data-answer="2">
+          <p>Pourquoi un smart contract ne peut-il pas simplement appeler une API web ?</p>
+          <div class="opts">
+            <button class="opt">C'est trop cher en gas</button>
+            <button class="opt">Les API web sont interdites par la loi</button>
+            <button class="opt">Tous les nœuds doivent obtenir le même résultat, ce qu'une API externe ne garantit pas</button>
+          </div>
+          <p class="explain">Le déterminisme est indispensable au consensus.</p>
+        </div>
+        <div class="q" data-answer="1">
+          <p>Quel modèle de vérification de bridge est le plus « trust-minimized » ?</p>
+          <div class="opts">
+            <button class="opt">Un multisig de 5 personnes</button>
+            <button class="opt">Un light client ou une preuve ZK du consensus de la chaîne source</button>
+            <button class="opt">Une entreprise de confiance</button>
+          </div>
+          <p class="explain">On vérifie alors cryptographiquement l'autre chaîne au lieu de croire des signataires.</p>
+        </div>
+      </div>
+
+    </article>
+  </div>
+</main>
+<script src="../js/sha256.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/demos.js"></script>
+</body>
+</html>
