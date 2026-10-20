@@ -440,3 +440,110 @@ function ammOut(x, y, dx, fee = 0.003) {
   bot.addEventListener("input", calc);
   calc();
 })();
+
+/* ---------- 13. NFT : mint, métadonnées, stockage ---------- */
+(function nftDemo() {
+  const root = $("#demo-nft");
+  if (!root) return;
+  const SHAPES = ["Cercle", "Triangle", "Losange", "Hexagone"];
+  const PALETTES = [["Cyan", 185], ["Magenta", 310], ["Violet", 265], ["Lime", 85], ["Ambre", 35]];
+  const tokens = [];   // { id, owner, hash, storage, broken }
+  let serverDown = false;
+  const who = $("#nft-who", root), storage = $("#nft-storage", root), gallery = $("#nft-gallery", root);
+  const meta = $("#nft-meta", root), table = $("#nft-owners", root), log = $("#nft-log", root);
+  let selected = null;
+
+  function traits(hash) {
+    const b = i => parseInt(hash.slice(i * 2, i * 2 + 2), 16);
+    return {
+      forme: SHAPES[b(0) % SHAPES.length],
+      couleur: PALETTES[b(1) % PALETTES.length],
+      halo: b(2) < 26 ? "Oui (rare, ~10 %)" : "Non",
+      bytes: b
+    };
+  }
+  function svgFor(hash) {
+    const t = traits(hash), b = t.bytes, h = t.couleur[1];
+    const pts = { Cercle: null, Triangle: 3, Losange: 4, Hexagone: 6 }[t.forme];
+    const poly = (n, r, rot) => [...Array(n)].map((_, i) => {
+      const a = rot + i * 2 * Math.PI / n;
+      return `${50 + r * Math.cos(a)},${50 + r * Math.sin(a)}`;
+    }).join(" ");
+    let inner = "";
+    for (let k = 0; k < 4; k++) {
+      const r = 34 - k * 7, rot = b(3 + k) / 255 * Math.PI;
+      const col = `hsl(${(h + k * 24) % 360} 100% ${60 - k * 6}%)`;
+      inner += pts
+        ? `<polygon points="${poly(pts, r, rot)}" fill="none" stroke="${col}" stroke-width="2"/>`
+        : `<circle cx="50" cy="50" r="${r}" fill="none" stroke="${col}" stroke-width="2" stroke-dasharray="${2 + b(7 + k) % 9} 3"/>`;
+    }
+    const halo = t.halo.startsWith("Oui") ? `<circle cx="50" cy="50" r="46" fill="none" stroke="#fff" stroke-width=".8" opacity=".9"/>` : "";
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="#060815"/>${halo}${inner}<circle cx="50" cy="50" r="3" fill="hsl(${h} 100% 70%)"/></svg>`;
+  }
+  const uriOf = tk => tk.storage === "onchain" ? "data:application/json;base64,…"
+    : tk.storage === "ipfs" ? `ipfs://bafy${tk.hash.slice(0, 20)}…/${tk.id}.json`
+    : `https://api.neonglyphs.example/meta/${tk.id}.json`;
+  const available = tk => !(tk.storage === "server" && serverDown);
+
+  function line(cls, txt) {
+    const d = document.createElement("div"); d.className = cls; d.textContent = txt; log.prepend(d);
+  }
+  function render() {
+    gallery.innerHTML = tokens.length ? tokens.map(tk => `
+      <button class="nft-card ${selected === tk.id ? "on" : ""}" data-id="${tk.id}">
+        ${available(tk) ? svgFor(tk.hash) : `<div class="nft-broken">404<br><small>image introuvable</small></div>`}
+        <span>#${tk.id} · ${tk.owner}</span>
+      </button>`).join("") : `<p class="demo-note">Aucun NFT pour l'instant : clique sur « mint() ».</p>`;
+    table.innerHTML = tokens.map(tk => `<tr><td>${tk.id}</td><td>${tk.owner}</td><td style="word-break:break-all">${uriOf(tk)}</td></tr>`).join("")
+      || `<tr><td colspan="3" style="color:var(--muted)">mapping vide</td></tr>`;
+    const tk = tokens.find(t => t.id === selected);
+    if (!tk) { meta.textContent = "Sélectionne un NFT pour voir ses métadonnées."; return; }
+    if (!available(tk)) {
+      meta.textContent = `GET ${uriOf(tk)}\n→ 404 Not Found\n\nLe token #${tk.id} existe toujours sur la blockchain et appartient toujours à ${tk.owner}…\nmais plus personne ne peut voir à quoi il ressemble.`;
+      return;
+    }
+    const t = traits(tk.hash);
+    meta.textContent = JSON.stringify({
+      name: `NeonGlyph #${tk.id}`,
+      description: "Glyphe génératif dérivé du hash du token.",
+      image: tk.storage === "onchain" ? "data:image/svg+xml;base64,…" : tk.storage === "ipfs" ? `ipfs://bafy${tk.hash.slice(20, 40)}…/${tk.id}.svg` : `https://cdn.neonglyphs.example/${tk.id}.svg`,
+      attributes: [
+        { trait_type: "Forme", value: t.forme },
+        { trait_type: "Couleur", value: t.couleur[0] },
+        { trait_type: "Halo", value: t.halo }
+      ]
+    }, null, 2);
+  }
+  $("#nft-mint", root).addEventListener("click", () => {
+    const id = tokens.length + 1;
+    const hash = sha256(`NeonGlyphs|${id}|${who.value}|${randHex(8)}`);
+    tokens.push({ id, owner: who.value, hash, storage: storage.value });
+    selected = id;
+    line("ok", `✔ ${who.value}.mint() → tokenId ${id}`);
+    line("ev", `   ↳ event Transfer(0x000…000 → ${who.value}, tokenId ${id})`);
+    render();
+  });
+  $("#nft-transfer", root).addEventListener("click", () => {
+    const tk = tokens.find(t => t.id === selected);
+    const to = $("#nft-to", root).value;
+    if (!tk) return line("err", "✖ aucun NFT sélectionné");
+    if (tk.owner !== who.value) return line("err", `✖ ${who.value}.transferFrom(#${tk.id}) → revert("pas le proprietaire ni approuve")`);
+    if (to === tk.owner) return line("err", "✖ destinataire identique");
+    line("ok", `✔ ${tk.owner}.transferFrom(${tk.owner} → ${to}, #${tk.id})`);
+    line("ev", `   ↳ event Transfer(${tk.owner} → ${to}, tokenId ${tk.id})`);
+    tk.owner = to;
+    render();
+  });
+  $("#nft-server", root).addEventListener("click", e => {
+    serverDown = !serverDown;
+    e.currentTarget.textContent = serverDown ? "↻ Relancer le serveur" : "💀 Le serveur du projet ferme";
+    line(serverDown ? "err" : "ok", serverDown ? "⚠ api.neonglyphs.example ne répond plus" : "✔ serveur de nouveau en ligne");
+    render();
+  });
+  gallery.addEventListener("click", e => {
+    const c = e.target.closest(".nft-card"); if (!c) return;
+    selected = Number(c.dataset.id); render();
+  });
+  line("", "> Contrat ERC-721 NeonGlyphs déployé à 0x" + randHex(20));
+  render();
+})();

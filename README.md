@@ -19,10 +19,11 @@ Blockverse Academy explique la mécanique de la crypto sans jargon inutile et sa
 | | 07 · Ethereum & l'EVM | Calculateur de frais de gas (EIP-1559) |
 | | 08 · Les smart contracts | Contrat « Cagnotte » à appeler |
 | | 09 · Tokens, stablecoins & NFT | — |
-| **03 · Avancé** | 10 · La DeFi | AMM x·y=k avec impact de prix |
-| | 11 · Les layers : L0, L1, L2, L3 | Pile des layers + économie d'un rollup |
-| | 12 · Bridges, oracles & interopérabilité | Bridge lock & mint (et son hack) |
-| | 13 · Sécurité, MEV & arnaques | Anatomie d'une attaque sandwich |
+| | 10 · Les NFT : comment ça marche | Mint d'une collection ERC-721 générative, métadonnées, stockage |
+| **03 · Avancé** | 11 · La DeFi | AMM x·y=k avec impact de prix |
+| | 12 · Les layers : L0, L1, L2, L3 | Pile des layers + économie d'un rollup |
+| | 13 · Bridges, oracles & interopérabilité | Bridge lock & mint (et son hack) |
+| | 14 · Sécurité, MEV & arnaques | Anatomie d'une attaque sandwich |
 
 Plus un **lexique** de plus de 80 termes, avec recherche.
 
@@ -50,7 +51,7 @@ puis ouvrir http://localhost:8000.
 ```
 ├── index.html          # accueil + parcours
 ├── lexique.html        # glossaire avec recherche
-├── modules/            # les 13 modules de cours
+├── modules/            # les 14 modules de cours
 ├── css/style.css       # thème néon
 └── js/
     ├── main.js         # layout, progression, quiz, fond animé

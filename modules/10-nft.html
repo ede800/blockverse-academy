@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Les NFT : comment ça marche — Blockverse Academy</title>
+  <meta name="description" content="Comment fonctionne un NFT : ERC-721, tokenId, métadonnées, IPFS, mint, marketplaces, royalties, Ordinals — avec un mint interactif.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-module="10" data-base="../">
+<main>
+  <div class="container article-layout">
+    <article class="article">
+
+      <h2 id="fongible">Fongible ou non fongible ?</h2>
+      <p>Un bien est <strong>fongible</strong> quand chaque unité est interchangeable avec une autre : un billet de 10 € vaut n'importe quel autre billet de 10 €, 1 ETH vaut 1 ETH. Un bien <strong>non fongible</strong> est unique : ta place de concert (rang F, siège 12), le titre de propriété de ton appartement, une œuvre originale.</p>
+      <p>Un <strong>NFT</strong> (<em>Non-Fungible Token</em>) est un token qui représente un élément <strong>unique et identifiable</strong> sur une blockchain. Il ne se divise pas (on ne possède pas « 0,3 » d'un NFT classique) et chaque exemplaire a son propre historique.</p>
+      <div class="callout analogy">
+        <span class="t">Analogie</span>
+        <p>Un NFT ressemble à un <strong>acte de propriété inscrit au cadastre</strong>. Le cadastre (la blockchain) ne contient pas la maison : il dit « la parcelle n°42 appartient à Alice ». Tout le monde peut consulter le registre, et seule Alice peut signer le transfert.</p>
+      </div>
+
+      <h2 id="sous-le-capot">Sous le capot : ce qui est vraiment sur la blockchain</h2>
+      <p>Comme un token ERC-20 (module 9), un NFT n'est qu'une <strong>entrée dans le stockage d'un smart contract</strong>. La différence : au lieu de <code>adresse → solde</code>, le contrat garde un dictionnaire <code>tokenId → propriétaire</code>.</p>
+      <div class="key-points">
+        <div class="kp"><b>Adresse du contrat</b><span>Identifie la collection (ex. 0xBC4C…f13D).</span></div>
+        <div class="kp"><b>tokenId</b><span>Numéro unique au sein du contrat (#1, #2, #8817…).</span></div>
+        <div class="kp"><b>Le couple des deux</b><span>Est unique au monde : c'est l'identité du NFT.</span></div>
+      </div>
+<pre class="code"><span class="c">// L'essentiel du standard ERC-721 (simplifié)</span>
+<span class="k">interface</span> <span class="t">IERC721</span> {
+    <span class="k">function</span> ownerOf(<span class="t">uint256</span> tokenId) <span class="k">external view returns</span> (<span class="t">address</span>);
+    <span class="k">function</span> balanceOf(<span class="t">address</span> owner) <span class="k">external view returns</span> (<span class="t">uint256</span>);
+    <span class="k">function</span> transferFrom(<span class="t">address</span> de, <span class="t">address</span> a, <span class="t">uint256</span> tokenId) <span class="k">external</span>;
+    <span class="k">function</span> safeTransferFrom(<span class="t">address</span> de, <span class="t">address</span> a, <span class="t">uint256</span> tokenId) <span class="k">external</span>;
+    <span class="k">function</span> approve(<span class="t">address</span> a, <span class="t">uint256</span> tokenId) <span class="k">external</span>;
+    <span class="k">function</span> setApprovalForAll(<span class="t">address</span> operateur, <span class="t">bool</span> ok) <span class="k">external</span>;  <span class="c">// ⚠ toute la collection</span>
+    <span class="k">event</span> <span class="t">Transfer</span>(<span class="t">address</span> <span class="k">indexed</span> de, <span class="t">address</span> <span class="k">indexed</span> a, <span class="t">uint256</span> <span class="k">indexed</span> tokenId);
+}
+<span class="c">// Extension « métadonnées »</span>
+<span class="k">function</span> tokenURI(<span class="t">uint256</span> tokenId) <span class="k">external view returns</span> (<span class="t">string</span>);   <span class="c">// → lien vers le JSON</span></pre>
+      <p>Toute l'histoire d'un NFT — sa création, chaque vente, chaque transfert — est lisible publiquement grâce aux événements <code>Transfer</code>. Une création (mint) est simplement un <code>Transfer</code> depuis l'adresse zéro.</p>
+
+      <h2 id="metadonnees">Et l'image, elle est où ?</h2>
+      <p>Surprise pour beaucoup : dans la grande majorité des cas, <strong>l'image n'est pas sur la blockchain</strong>. Stocker 1 Mo sur Ethereum coûterait des milliers de dollars. Le contrat stocke seulement un lien :</p>
+      <pre class="code"><span class="t">Contrat</span>  tokenURI(42) → <span class="s">"ipfs://bafy…/42.json"</span>
+            │
+            ▼
+<span class="t">Métadonnées JSON</span>  { "name": "Glyph #42", "image": <span class="s">"ipfs://bafy…/42.png"</span>,
+                    "attributes": [ { "trait_type": "Fond", "value": "Néon" } ] }
+            │
+            ▼
+<span class="t">Fichier image</span>    42.png</pre>
+      <div class="table-wrap">
+      <table class="data">
+        <tr><th>Stockage</th><th>Principe</th><th>Risque</th></tr>
+        <tr><td><strong>Serveur web</strong> (https://…)</td><td>L'équipe héberge les fichiers sur son serveur</td><td>Le serveur ferme ou l'équipe remplace l'image : ton NFT pointe vers rien</td></tr>
+        <tr><td><strong>IPFS</strong> (ipfs://…)</td><td>Le lien est le <strong>hash du contenu</strong> (module 2) : modifier le fichier change son adresse</td><td>Le fichier doit rester « épinglé » par au moins un nœud, sinon il disparaît</td></tr>
+        <tr><td><strong>Arweave</strong> (ar://…)</td><td>Stockage permanent payé une seule fois</td><td>Dépend de la pérennité économique du réseau</td></tr>
+        <tr><td><strong>On-chain</strong></td><td>L'image (souvent un SVG) ou le code qui la génère est dans le contrat</td><td>Coûteux, limité à des œuvres légères — mais le plus robuste</td></tr>
+      </table>
+      </div>
+
+      <div class="panel corners demo" id="demo-nft">
+        <div class="demo-title">Démo · Collection ERC-721 « NeonGlyphs » (simulation)</div>
+        <div class="demo-row">
+          <div>
+            <label for="nft-who">Agir en tant que</label>
+            <select class="input" id="nft-who"><option>Alice</option><option>Bob</option><option>Carol</option></select>
+          </div>
+          <div>
+            <label for="nft-storage">Stockage des métadonnées</label>
+            <select class="input" id="nft-storage">
+              <option value="server">Serveur web du projet</option>
+              <option value="ipfs">IPFS (adressé par hash)</option>
+              <option value="onchain">100 % on-chain</option>
+            </select>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn small" id="nft-mint">◆ mint()</button>
+          <select class="input" id="nft-to" style="width:auto;padding:6px 10px" aria-label="Destinataire"><option>Bob</option><option>Carol</option><option>Alice</option></select>
+          <button class="btn small lime" id="nft-transfer">transferFrom() → destinataire</button>
+          <button class="btn small magenta" id="nft-server">💀 Le serveur du projet ferme</button>
+        </div>
+        <div class="nft-gallery" id="nft-gallery"></div>
+        <div class="demo-row">
+          <div>
+            <label>Stockage du contrat (ownerOf / tokenURI)</label>
+            <div class="table-wrap"><table class="data" style="margin:6px 0;font-size:.76rem"><thead><tr><th>tokenId</th><th>owner</th><th>tokenURI</th></tr></thead><tbody id="nft-owners"></tbody></table></div>
+            <label style="margin-top:10px">Journal</label>
+            <div class="log" id="nft-log" style="height:150px"></div>
+          </div>
+          <div>
+            <label>Métadonnées du NFT sélectionné</label>
+            <pre class="code meta-out" id="nft-meta"></pre>
+          </div>
+        </div>
+        <p class="demo-note">Chaque image est <strong>générée à partir du hash</strong> du token (comme l'art génératif d'Art Blocks) : forme, couleur et « halo » rare en découlent. Mint quelques NFT avec différents stockages, puis fais fermer le serveur : les tokens existent toujours, mais ceux hébergés sur le serveur n'affichent plus rien.</p>
+      </div>
+
+      <div class="callout warn">
+        <span class="t">Métadonnées modifiables</span>
+        <p>Si le contrat permet à l'équipe de changer le <code>baseURI</code>, elle peut modifier l'apparence de tous les NFT après la vente. Les projets sérieux « gèlent » leurs métadonnées (fonction <em>freeze</em>) une fois la collection terminée.</p>
+      </div>
+
+      <h2 id="mint">Le mint : comment naît un NFT</h2>
+      <ul>
+        <li><strong>Mint public</strong> : n'importe qui appelle <code>mint()</code> en payant le prix fixé, jusqu'à épuisement de l'offre.</li>
+        <li><strong>Allowlist</strong> : seules certaines adresses peuvent minter en avance. Le contrat ne stocke pas la liste entière, seulement une <strong>racine de Merkle</strong> (module 2) ; chacun fournit sa preuve de Merkle.</li>
+        <li><strong>Reveal</strong> : on mint d'abord une image « mystère », puis les vraies métadonnées sont révélées. Pour que l'attribution des NFT rares soit équitable, on utilise un aléatoire vérifiable (VRF, module 13).</li>
+        <li><strong>Lazy minting</strong> : le créateur signe le NFT hors chaîne ; il n'est réellement créé (et le gas payé) qu'au moment du premier achat.</li>
+        <li><strong>Art génératif</strong> : le contrat enregistre un hash au moment du mint, et un script (parfois stocké on-chain) transforme ce hash en œuvre — exactement ce que fait la démo.</li>
+      </ul>
+
+      <h2 id="marketplaces">Acheter et vendre : les marketplaces</h2>
+      <p>Une marketplace NFT (OpenSea, Magic Eden, Blur…) fonctionne en général ainsi :</p>
+      <ol>
+        <li>Le vendeur appelle une fois <code>setApprovalForAll(marketplace, true)</code> : il autorise le contrat de la marketplace à déplacer ses NFT de cette collection.</li>
+        <li>Pour mettre en vente, il <strong>signe un ordre hors chaîne</strong> (« je vends #42 pour 0,5 ETH jusqu'à vendredi ») : gratuit, pas de gas.</li>
+        <li>Quand un acheteur accepte, il envoie la transaction : le contrat vérifie la signature, puis, de façon <strong>atomique</strong>, transfère les ETH au vendeur et le NFT à l'acheteur. Les deux arrivent, ou rien ne se passe.</li>
+      </ol>
+      <div class="callout danger">
+        <span class="t">Piège classique</span>
+        <p>Comme un ordre de vente n'est qu'une signature, un site de phishing peut te faire signer « vendre toute ma collection pour 0 ETH ». Et une demande de <code>setApprovalForAll</code> sur un faux site donne à l'attaquant un accès à <strong>tous</strong> tes NFT de la collection (module 14).</p>
+      </div>
+
+      <h2 id="royalties">Les royalties : une promesse pas toujours tenue</h2>
+      <p>Les créateurs touchent souvent un pourcentage sur chaque revente (5 à 10 %). Le standard <strong>ERC-2981</strong> permet au contrat d'indiquer ce pourcentage… mais <strong>pas de l'imposer</strong> : un transfert ERC-721 peut se faire sans paiement. En 2022-2023, plusieurs marketplaces ont rendu les royalties optionnelles pour attirer les traders. Certains standards plus récents restreignent les transferts aux places de marché qui les respectent, au prix d'une moindre liberté pour les détenteurs.</p>
+
+      <h2 id="variantes">Les variantes et les autres blockchains</h2>
+      <div class="table-wrap">
+      <table class="data">
+        <tr><th>Variante</th><th>Particularité</th></tr>
+        <tr><td><strong>ERC-1155</strong></td><td>Un contrat gère plusieurs types d'objets, avec plusieurs exemplaires possibles (ex. 500 « épées de feu »). Idéal pour les jeux.</td></tr>
+        <tr><td><strong>Soulbound tokens</strong></td><td>NFT non transférables, liés à une adresse : diplômes, badges, réputation.</td></tr>
+        <tr><td><strong>Solana</strong></td><td>NFT via les programmes Metaplex ; les « compressed NFT » utilisent des arbres de Merkle pour en créer des millions pour quelques dollars.</td></tr>
+        <tr><td><strong>Bitcoin Ordinals</strong></td><td>Depuis 2023, des données (image, texte) sont <strong>inscrites directement</strong> dans une transaction Bitcoin et rattachées à un satoshi précis : tout est on-chain.</td></tr>
+        <tr><td><strong>NFT dynamiques</strong></td><td>Les métadonnées évoluent selon des données externes (oracles) : un personnage qui progresse, un billet qui devient souvenir après le concert.</td></tr>
+      </table>
+      </div>
+
+      <h2 id="usages">Usages réels et limites</h2>
+      <div class="demo-row">
+        <div class="panel" style="padding:18px">
+          <h3 style="margin-top:0">✔ À quoi ça sert vraiment</h3>
+          <ul>
+            <li>Art numérique et provenance vérifiable</li>
+            <li>Billetterie (anti-contrefaçon, revente encadrée)</li>
+            <li>Noms de domaine (ENS : <code>alice.eth</code>)</li>
+            <li>Objets de jeu qu'on possède réellement</li>
+            <li>Positions DeFi (une position de liquidité Uniswap v3 est un NFT)</li>
+            <li>Certificats, adhésions, titres d'actifs réels</li>
+          </ul>
+        </div>
+        <div class="panel" style="padding:18px">
+          <h3 style="margin-top:0;color:var(--magenta)">✖ Ce qu'il faut savoir</h3>
+          <ul>
+            <li>Posséder le NFT ≠ posséder les droits d'auteur (sauf licence explicite)</li>
+            <li>N'importe qui peut copier l'image : le NFT prouve la propriété du token, pas l'exclusivité du fichier</li>
+            <li>Marché très spéculatif : après la bulle de 2021-2022, la plupart des collections ont perdu l'essentiel de leur valeur</li>
+            <li>Liquidité faible : il faut trouver un acheteur pour <em>ce</em> NFT précis</li>
+            <li>Wash trading : de faux échanges gonflent les volumes affichés</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="panel quiz" data-quiz>
+        <h2>Quiz</h2>
+        <div class="q" data-answer="1">
+          <p>Qu'est-ce qui identifie de manière unique un NFT sur Ethereum ?</p>
+          <div class="opts">
+            <button class="opt">Son image</button>
+            <button class="opt">L'adresse de son contrat + son tokenId</button>
+            <button class="opt">Le nom de son créateur</button>
+          </div>
+          <p class="explain">Deux collections peuvent avoir un token #1, mais le couple (contrat, tokenId) est unique.</p>
+        </div>
+        <div class="q" data-answer="2">
+          <p>Où se trouve généralement l'image d'un NFT ?</p>
+          <div class="opts">
+            <button class="opt">Toujours dans la blockchain</button>
+            <button class="opt">Dans ton wallet</button>
+            <button class="opt">Hors chaîne (serveur, IPFS, Arweave), via un lien dans les métadonnées</button>
+          </div>
+          <p class="explain">Seules certaines collections stockent l'œuvre entièrement on-chain (SVG, Ordinals).</p>
+        </div>
+        <div class="q" data-answer="0">
+          <p>Pourquoi un lien IPFS est-il plus fiable qu'un lien vers le serveur du projet ?</p>
+          <div class="opts">
+            <button class="opt">Parce qu'il est dérivé du hash du contenu : le fichier ne peut pas être remplacé en douce</button>
+            <button class="opt">Parce qu'IPFS garantit que le fichier existera pour toujours</button>
+            <button class="opt">Parce qu'IPFS est une blockchain</button>
+          </div>
+          <p class="explain">Attention : IPFS garantit l'intégrité, pas la disponibilité. Il faut que quelqu'un continue à « épingler » le fichier.</p>
+        </div>
+        <div class="q" data-answer="1">
+          <p>Acheter un NFT d'une image te donne-t-il les droits d'auteur sur l'image ?</p>
+          <div class="opts">
+            <button class="opt">Oui, toujours</button>
+            <button class="opt">Non, sauf si une licence l'accorde explicitement</button>
+            <button class="opt">Oui, mais seulement sur Ethereum</button>
+          </div>
+          <p class="explain">Le NFT prouve la propriété du token ; les droits dépendent de la licence du projet.</p>
+        </div>
+      </div>
+
+    </article>
+  </div>
+</main>
+<script src="../js/sha256.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/demos.js"></script>
+</body>
+</html>
